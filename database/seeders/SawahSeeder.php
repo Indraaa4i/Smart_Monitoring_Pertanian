@@ -15,7 +15,8 @@ class SawahSeeder extends Seeder
         $petani->lahan()->create([
             'nama_lahan' => 'Sawah Blok A',
             'luas_lahan' => 1.50,
-            'lokasi' => 'Lokasi contoh',
+            'lokasi' => 'Indramayu',
+            'kode_wilayah' => '32.12.13.2005',
             'tanggal_tanam' => today()->subDays(5),
         ]);
     }
