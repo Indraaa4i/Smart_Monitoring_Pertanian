@@ -1,10 +1,10 @@
-@props(['daftarLahan' => collect(), 'lahan' => null, 'phase' => null, 'appName' => 'Smart Sawah'])
+@props(['daftarLahan' => collect(), 'lahan' => null, 'phase' => null, 'appName' => 'Smart Sawah', 'title' => null, 'subtitle' => null])
 <header class="topbar card">
     <div class="topbar__brand">
         <span class="topbar__logo"><x-icon name="leaf" :size="20" /></span>
         <div>
-            <p class="topbar__name">{{ $appName }}</p>
-            <p class="topbar__sub">Dashboard pantauan sawah untuk petani</p>
+            <p class="topbar__name">{{ $title ?? $appName }}</p>
+            <p class="topbar__sub">{{ $subtitle ?? 'Dashboard pantauan sawah untuk petani' }}</p>
         </div>
     </div>
     <div class="topbar__right">
