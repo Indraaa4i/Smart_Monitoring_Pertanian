@@ -17,7 +17,8 @@ Aturan kerja:
 3. Jika perintah ambigu, bertentangan dengan file ini, atau butuh keputusan desain: **berhenti dan tanya**. Jangan menebak.
 4. Jangan menambah fitur, paket Composer/npm, atau mengubah desain di luar tugas.
 5. Untuk tugas berisiko (database, migrasi), jelaskan rencana dulu dan tunggu persetujuan. Pakai mode Plan bila tersedia.
-6. Selesai tugas: verifikasi (bagian 7) dan laporkan dengan format bagian 8.
+6. Selesai tugas: verifikasi (bagian 8) dan laporkan dengan format bagian 8.
+7. Pekerjaan baru **harus tercatat di tabel tugas (bagian 9) lebih dulu**. Kerjakan di branch `fitur/...` dan buka Pull Request. Jangan commit langsung ke `main`, dan jangan mencampur perubahan desain, kode, dan dokumen dalam satu commit.
 
 ## 1. Ringkasan proyek
 
@@ -26,7 +27,7 @@ Dashboard pemantauan kelembapan dan pH tanah sawah berbasis web-IoT untuk petani
 - Stack: Laravel 13.x, PHP 8.4, MySQL 8, Vite, Blade. Dev di Windows + Laragon (PowerShell).
 - Frontend: Blade + CSS biasa (tanpa Tailwind/Bootstrap), komponen Blade anonim.
 - Bahasa antarmuka: Indonesia. Komentar kode: Indonesia. Zona waktu: `Asia/Jakarta` (`APP_TIMEZONE`).
-- Desain UI acuan ada di Figma milik pemilik proyek. Jangan mengubah tampilan tanpa alasan jelas.
+- **Tampilan yang berlaku adalah yang ada di `main` saat ini** (diputuskan pemilik pada 2026-11-06, termasuk layout full width dari commit `46a8b36`). Figma milik pemilik sedang disesuaikan mengikuti tampilan itu. Jika Figma dan `main` berbeda, `main` yang benar sampai Figma diperbarui. Jangan mengubah tampilan tanpa alasan jelas.
 
 ## 2. Status saat ini (terverifikasi dari dump database 22 Okt 2026)
 
@@ -35,7 +36,8 @@ Dashboard pemantauan kelembapan dan pH tanah sawah berbasis web-IoT untuk petani
 - Tiga tabel lain **menyusul**: `sensor`, `data_sensor`, `rekomendasi`. Migrasinya disimpan di `database/menyusul/` dan **tidak dijalankan**.
 - Dashboard tetap berjalan tanpa `data_sensor`: `DashboardService` memakai `Schema::hasTable('data_sensor')`. Kartu sensor menampilkan "Data belum masuk".
 - Cuaca diambil dari API BMKG (bagian 6) dan sudah berfungsi.
-- Ada migrasi di database yang **bukan dari Lead**: `2026_10_20_174252_add_kode_wilayah_to_lahan_table` (batch 2). Lihat tugas T1.
+- Migrasi `2026_10_20_174252_add_kode_wilayah_to_lahan_table` (commit `2060e35`) menambah kolom yang sudah dibuat `create_lahan_table`. Di instalasi baru ia **gagal "Duplicate column name"**. Keputusan Lead: diberi pengecekan `Schema::hasColumn` (T1).
+- Halaman Riwayat sudah ada sebagai **UI statis (demo)**. Datanya hardcoded dan belum memakai service.
 
 ### Daftar fitur
 
@@ -48,7 +50,8 @@ Dashboard pemantauan kelembapan dan pH tanah sawah berbasis web-IoT untuk petani
 | Data sensor kelembapan & pH | Belum | Menunggu T4 dan T5. Kartu menampilkan "Data belum masuk". |
 | Rekomendasi tersimpan | Belum | Tabel menyusul. Saran saat ini berasal dari `config/sawah.php`. |
 | Login petani | Belum | T6. |
-| Halaman Kondisi Tanah, Rekomendasi, Riwayat | Placeholder | Belum ada desain. |
+| Halaman Riwayat | UI statis (demo) | Data hardcoded. Disambung ke data nyata setelah tabel `data_sensor` aktif (T12). |
+| Halaman Kondisi Tanah, Rekomendasi | Placeholder | Belum ada desain. |
 
 ## 3. Struktur proyek
 
@@ -65,7 +68,7 @@ database/seeders/SawahSeeder.php
 resources/css/smart-sawah.css          seluruh gaya (token di :root)
 resources/js/smart-sawah.js            toggle sidebar mobile
 resources/views/layouts/app.blade.php
-resources/views/pages/                 beranda, placeholder
+resources/views/pages/                 beranda, riwayat (UI statis), placeholder
 resources/views/components/            sidebar, topbar, welcome, phase, metric-card, weather-card, actions, history, notice, badge, icon
 routes/web.php
 ```
@@ -90,7 +93,8 @@ Relasi: petani 1—0..* lahan; lahan 1—0..* sensor / data_sensor / rekomendasi
 - Kunci asing memakai `restrictOnDelete()`; riwayat data tidak boleh hilang diam-diam.
 - Parameter ukur baru = tambah kolom di `data_sensor` (lewat migrasi baru) **dan** satu entri di `config/sawah.php` → `sensors` (kunci = nama kolom).
 - **Jangan mengedit migrasi yang sudah dijalankan.** Perubahan skema = migrasi baru. Migrasi tambahan harus aman diulang (`Schema::hasColumn`) bila menyentuh kolom yang mungkin sudah ada.
-- CSS: pakai token di `:root` dan kelas BEM yang ada. Breakpoint responsif: 1100, 1024, 860, 640, 380 px. Komponen Blade tetap anonim di `resources/views/components`.
+- CSS: pakai token di `:root` dan kelas BEM yang ada. Breakpoint responsif: 1100, 1024, 860, 640 px (blok 380 px dihapus pada `46a8b36`; pemulihan opsional lewat T13). Komponen Blade tetap anonim di `resources/views/components`.
+- Jangan menambah `!important` baru untuk mengakali layout. Yang sudah ada dari `46a8b36` dibiarkan sampai T13.
 - Jangan memakai nama prop `$app` pada komponen Blade (bentrok dengan variabel global Laravel).
 - Jangan menaruh `localStorage` atau kunci rahasia di front-end.
 
@@ -129,6 +133,8 @@ Hasil yang benar: array berisi `temp`, `condition`, `icon`, `rain`, `note`. Hasi
 - **Jangan** menjalankan `migrate:fresh`, `migrate:refresh`, `db:wipe`, `DROP`/`TRUNCATE`, atau menghapus data **tanpa izin tertulis dari pemilik proyek** di percakapan.
 - **Jangan** menghapus atau menimpa file bawaan Laravel (mis. `app/Http/Controllers/Controller.php`, `config/*`, `bootstrap/*`). Saat menyalin, gabungkan file, bukan mengganti seluruh folder.
 - **Jangan** mengedit `vendor/` atau `node_modules/`.
+- **Jangan** mengunduh atau menjalankan skrip pemasang dari internet (mis. `php.new`, `curl | bash`, `iex`). PHP, Composer, Node, dan MySQL sudah tersedia lewat Laragon. Jika salah satunya tidak ditemukan, **berhenti dan laporkan**.
+- **Jangan** mengarahkan test (`php artisan test`) ke database `smart_sawah`. Test harus memakai database terpisah atau sqlite `:memory:`; test dengan `RefreshDatabase` pada database utama akan menghapus datanya.
 - **Jangan** membaca/menampilkan isi `.env`, dan jangan commit `.env`, dump `*.sql`, atau kredensial. Akun demo `pak_tani` hanya untuk pengembangan.
 - **Jangan** membuat endpoint penerima data IoT, fitur login, atau mengaktifkan tabel "menyusul" sebelum tugasnya berstatus AKTIF.
 
@@ -159,9 +165,15 @@ Format laporan ke pemilik proyek:
 
 | ID | Status | Tugas |
 |---|---|---|
-| T1 | **AKTIF** | Tinjau `database/migrations/2026_10_20_174252_add_kode_wilayah_to_lahan_table.php`. `create_lahan_table` sudah membuat `kode_wilayah`, jadi migrasi ini berisiko memicu "duplicate column" pada instalasi baru. **Hanya baca dan laporkan isinya.** Jangan hapus/ubah sampai Lead memutuskan. |
-| T2 | **AKTIF** | `SawahSeeder`: tambahkan `'kode_wilayah' => '32.12.13.2005'` pada `lahan()->create([...])` agar instalasi baru sama dengan data sekarang. Jangan ubah `lokasi` (menunggu pemilik). Jangan jalankan seeder (data sudah ada). |
-| T3 | **AKTIF** | Pastikan `.gitignore` mengabaikan `.env` dan `*.sql`. Jika ada `.sql`/`.env` yang sudah ter-track di Git, **laporkan, jangan hapus riwayat**. |
+| T1 | **AKTIF** | Keputusan Lead: ubah `2026_10_20_174252_add_kode_wilayah_to_lahan_table.php` agar `up()` langsung `return` bila `Schema::hasColumn('lahan', 'kode_wilayah')`, dan kosongkan `down()` (kolom dimiliki `create_lahan_table`). Ini pengecualian atas aturan "jangan edit migrasi yang sudah dijalankan" karena hanya menambah penjagaan; database yang sudah menjalankannya tidak terpengaruh. Verifikasi di database kosong terpisah (mis. `$env:DB_DATABASE="smart_sawah_uji"; php artisan migrate`), bukan di database utama. |
+| T2 | SELESAI | `SawahSeeder` memuat `kode_wilayah` `32.12.13.2005`. `lokasi` kini "Indramayu". |
+| T3 | SELESAI | `.gitignore` memuat `.env` dan `*.sql` (E6). Tidak ada `.env`/`*.sql` yang ter-track. |
+| T8 | **AKTIF** | Ganti nama `pages/Riwayat.blade.php` menjadi `pages/riwayat.blade.php` dengan `git mv` (dua langkah lewat nama sementara, karena Windows tidak membedakan huruf besar-kecil) dan ubah route menjadi `pages.riwayat`. |
+| T9 | **AKTIF** | `git rm --cached desktop.ini` dan tambahkan `desktop.ini` ke `.gitignore`. Tidak mengubah file lain. |
+| T10 | MENUNGGU (pemilik) | Aktifkan `pdo_sqlite` di `php.ini` masing-masing komputer (pengaturan lokal, bukan perubahan repositori). Perbaiki `tests/Feature/ExampleTest.php` setelahnya. |
+| T11 | SELESAI | Pemilik memutuskan tampilan saat ini (full width, sudut tidak membulat, ikon sidebar bulat) sebagai desain yang berlaku dan menyesuaikan Figma. Tidak perlu konfirmasi lagi. |
+| T12 | MENUNGGU | Sambungkan Riwayat ke data nyata lewat service setelah T4. Ganti tanggal hardcoded dengan `now()`. |
+| T13 | MENUNGGU (prioritas rendah) | Rapikan CSS dari `46a8b36` tanpa mengubah tampilan: hilangkan `!important` dengan memperbaiki aturan sumbernya, dan kembalikan blok 380 px (daftar menu sidebar satu kolom di layar sangat kecil). Verifikasi dengan membandingkan tangkapan layar sebelum dan sesudah di lebar 1440, 1024, 768, 375 px. |
 | T4 | MENUNGGU | Aktifkan `sensor`, `data_sensor`, `rekomendasi`: pindahkan migrasi dari `database/menyusul/` ke `database/migrations/` lalu `php artisan migrate` (tanpa `fresh`). Butuh persetujuan. |
 | T5 | MENUNGGU | Endpoint HTTP penerima data IoT (`POST` JSON, token per perangkat, simpan ke `data_sensor`, `lahan_id` dari sensor, idempoten lewat UNIQUE sensor+waktu). Butuh spesifikasi dari Lead. |
 | T6 | MENUNGGU | Login petani. Pemilik proyek belum memutuskan **username** (sesuai ERD terbaru) atau **email**. Jangan dikerjakan. |
@@ -170,8 +182,7 @@ Format laporan ke pemilik proyek:
 ## 10. Pertanyaan terbuka untuk pemilik proyek
 
 1. Login memakai username atau email? (T6)
-2. Isi `lahan.lokasi` yang sebenarnya? Saat ini "Lokasi contoh".
-3. Apakah migrasi `add_kode_wilayah_to_lahan_table` dibuat sengaja, dan oleh siapa? (T1)
+2. Isi `lahan.lokasi` yang lebih rinci? Seeder kini "Indramayu".
 
 ## 11. Cara memperbarui file ini
 
@@ -186,3 +197,5 @@ Format laporan ke pemilik proyek:
 |---|---|
 | 2026-10-22 | Dokumen dibuat. |
 | 2026-10-22 | Tambah daftar fitur (bagian 2). Bagian 6 menjadi fitur Cuaca BMKG. Tambah bagian 11. |
+| 2026-11-05 | Tinjauan laporan tim: perbaikan E1, E3, E4, E5, E6 diterima. Keputusan E2 (T1), E9 (T8), E13 (T9). Tambah T8-T12, aturan branch/PR, larangan skrip pemasang dan test ke database utama. Riwayat dicatat sebagai UI statis. |
+| 2026-11-06 | Pemilik menetapkan tampilan `main` saat ini sebagai desain yang berlaku; Figma disesuaikan. T11 selesai; tambah T13 (rapikan `!important` dan breakpoint 380 px, opsional). |
