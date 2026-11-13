@@ -194,3 +194,121 @@ a { color: inherit; text-decoration: none; }
     font-weight: 700;
     padding: 0;
 }
+/* resources/css/smart-sawah.css
+   Tempel di BAGIAN PALING BAWAH file. Halaman: Kondisi Tanah dan Rekomendasi.
+   Tanpa !important. Jika token abu-abu/kuning sudah ada di :root, pakai itu. */
+
+:root {
+  --status-aman-bg: var(--green-100);
+  --status-aman-fg: var(--green-900);
+  --status-waspada-bg: #fef3c7;
+  --status-waspada-fg: #92400e;
+  --status-offline-bg: #eceeec;
+  --status-offline-fg: #4b5450;
+  --kartu-garis: #eceeec;
+  --kartu-redup: #6b7270;
+  --kartu-radius: 18px;
+}
+
+.page-stack { display: flex; flex-direction: column; gap: 16px; }
+
+.page-hero { background: var(--green-100); border-radius: var(--kartu-radius); padding: 28px 24px 30px; }
+.page-hero__title { margin: 0; font-size: 32px; font-weight: 800; color: var(--green-900); }
+.page-hero__sub { margin: 6px 0 0; font-size: 14px; color: var(--kartu-redup); }
+
+.page-note { margin: 0; font-size: 12px; color: var(--kartu-redup); }
+
+.panel { background: #fff; border-radius: var(--kartu-radius); padding: 22px; }
+.panel__title { margin: 0; font-size: 18px; font-weight: 700; color: #1a2420; }
+.panel__title--icon { display: flex; align-items: center; gap: 10px; }
+.panel__sub { margin: 10px 0 14px; font-size: 13px; color: var(--kartu-redup); }
+.panel__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.status-pill { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status-pill--aman { background: var(--status-aman-bg); color: var(--status-aman-fg); }
+.status-pill--waspada { background: var(--status-waspada-bg); color: var(--status-waspada-fg); }
+.status-pill--offline { background: var(--status-offline-bg); color: var(--status-offline-fg); }
+
+/* Ringkasan kondisi */
+.soil-summary { display: flex; align-items: center; gap: 14px; border-radius: var(--kartu-radius); padding: 22px 24px; }
+.soil-summary--aman { background: var(--status-aman-bg); color: var(--status-aman-fg); }
+.soil-summary--waspada { background: var(--status-waspada-bg); color: var(--status-waspada-fg); }
+.soil-summary--offline { background: var(--status-offline-bg); color: var(--status-offline-fg); }
+.soil-summary__title { margin: 0; font-size: 24px; font-weight: 700; }
+.soil-summary__text { margin: 4px 0 0; font-size: 14px; }
+
+/* Kartu parameter */
+.soil-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.soil-card { display: flex; flex-direction: column; background: #fff; border-radius: var(--kartu-radius); padding: 22px; }
+.soil-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.soil-card__label { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px; font-weight: 600; }
+.soil-card__value { margin: 28px 0 22px; font-size: 44px; font-weight: 800; line-height: 1; color: var(--green-900); }
+.soil-card--offline .soil-card__value { color: var(--status-offline-fg); }
+.soil-card__title { margin: 0; font-size: 15px; font-weight: 700; }
+.soil-card__hint { margin: 10px 0 22px; font-size: 14px; color: var(--kartu-redup); }
+.soil-card__scale { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--kartu-redup); }
+.soil-card__scale strong { color: var(--green-900); }
+.soil-card__time { margin: 16px 0 0; padding-top: 16px; border-top: 1px solid var(--kartu-garis); font-size: 12px; color: var(--kartu-redup); }
+
+.soil-meter { position: relative; height: 8px; border-radius: 999px; background: var(--kartu-garis); }
+.soil-meter__zone { position: absolute; top: 0; bottom: 0; left: var(--zona-awal); width: var(--zona-lebar); background: var(--green-100); }
+
+/* Status sensor */
+.sensor-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 48px; margin-top: 14px; }
+.sensor-item { display: flex; align-items: center; gap: 12px; }
+.sensor-item__info { flex: 1; min-width: 0; }
+.sensor-item__name { margin: 0; font-size: 14px; font-weight: 700; }
+.sensor-item__time { margin: 4px 0 0; font-size: 12px; color: var(--kartu-redup); }
+
+/* Tabel dan keadaan kosong */
+.table-scroll { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { padding: 10px 12px; background: var(--kartu-garis); font-size: 13px; font-weight: 600; text-align: left; color: var(--kartu-redup); }
+.data-table th:first-child { border-radius: 8px 0 0 8px; }
+.data-table th:last-child { border-radius: 0 8px 8px 0; }
+.empty-state { padding: 22px 12px 8px; }
+.empty-state__title { margin: 10px 0 0; font-size: 16px; font-weight: 700; }
+.empty-state__text { margin: 10px 0 0; font-size: 14px; color: var(--kartu-redup); }
+
+/* Rekomendasi */
+.saran-grid { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.saran-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.chip-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.chip { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.chip--aman { background: var(--status-aman-bg); color: var(--status-aman-fg); }
+.chip--waspada { background: var(--status-waspada-bg); color: var(--status-waspada-fg); }
+.chip--offline { background: var(--status-offline-bg); color: var(--status-offline-fg); }
+.saran-card__title { margin: 22px 0 0; font-size: 26px; font-weight: 800; color: var(--green-900); }
+.saran-card__text { margin: 14px 0 0; font-size: 15px; color: var(--kartu-redup); }
+.saran-card__steps { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--kartu-garis); }
+.saran-card__steps-title { margin: 0 0 16px; font-size: 15px; font-weight: 700; }
+.saran-card__meta { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; font-size: 12px; color: var(--kartu-redup); }
+.step-list { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.step-list__item { display: flex; align-items: flex-start; gap: 12px; }
+.step-list__no { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 8px; background: var(--green-100); font-size: 13px; font-weight: 700; color: var(--green-900); }
+.step-list__title { margin: 0; font-size: 14px; font-weight: 700; }
+.step-list__text { margin: 4px 0 0; font-size: 13px; color: var(--kartu-redup); }
+
+.cuaca-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cuaca-card__source { margin: 10px 0 0; font-size: 12px; color: var(--kartu-redup); }
+.cuaca-card__title { margin: 18px 0 0; font-size: 22px; font-weight: 700; }
+.cuaca-card__text { margin: 12px 0 0; font-size: 14px; color: var(--kartu-redup); }
+
+.date-select { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 10px 14px; border-radius: 12px; background: var(--kartu-garis); font-size: 14px; }
+
+.callout { display: flex; align-items: flex-start; gap: 14px; padding: 20px 24px; border-radius: var(--kartu-radius); background: var(--green-100); color: var(--green-900); }
+.callout__title { margin: 0; font-size: 15px; font-weight: 700; }
+.callout__text { margin: 4px 0 0; font-size: 14px; }
+
+@media (max-width: 860px) {
+  .soil-grid, .sensor-list, .saran-grid, .chip-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .page-hero { padding: 22px 18px; }
+  .page-hero__title { font-size: 26px; }
+  .soil-summary__title { font-size: 20px; }
+  .soil-card__value { font-size: 36px; }
+  .panel, .soil-card { padding: 18px; }
+  .date-select { gap: 16px; }
+}

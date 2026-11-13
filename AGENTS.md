@@ -174,6 +174,8 @@ Format laporan ke pemilik proyek:
 | T11 | SELESAI | Pemilik memutuskan tampilan saat ini (full width, sudut tidak membulat, ikon sidebar bulat) sebagai desain yang berlaku dan menyesuaikan Figma. Tidak perlu konfirmasi lagi. |
 | T12 | MENUNGGU | Sambungkan Riwayat ke data nyata lewat service setelah T4. Ganti tanggal hardcoded dengan `now()`. |
 | T13 | MENUNGGU (prioritas rendah) | Rapikan CSS dari `46a8b36` tanpa mengubah tampilan: hilangkan `!important` dengan memperbaiki aturan sumbernya, dan kembalikan blok 380 px (daftar menu sidebar satu kolom di layar sangat kecil). Verifikasi dengan membandingkan tangkapan layar sebelum dan sesudah di lebar 1440, 1024, 768, 375 px. |
+| T14 | SELESAI | Sudah diverifikasi: `phase` dihitung dari `HalamanTanahService->phase()` dan kedua controller return 200. Error "Undefined variable $lahan" sudah diperbaiki dengan menangkap variabel lahan terlebih dahulu. |
+| T15 | SELESAI | Sudah diverifikasi: `phase` dihitung dari `HalamanTanahService->phase()` dan kedua controller return 200. Error "Undefined variable $lahan" sudah diperbaiki dengan menangkap variabel lahan terlebih dahulu. |
 | T4 | MENUNGGU | Aktifkan `sensor`, `data_sensor`, `rekomendasi`: pindahkan migrasi dari `database/menyusul/` ke `database/migrations/` lalu `php artisan migrate` (tanpa `fresh`). Butuh persetujuan. |
 | T5 | MENUNGGU | Endpoint HTTP penerima data IoT (`POST` JSON, token per perangkat, simpan ke `data_sensor`, `lahan_id` dari sensor, idempoten lewat UNIQUE sensor+waktu). Butuh spesifikasi dari Lead. |
 | T6 | MENUNGGU | Login petani. Pemilik proyek belum memutuskan **username** (sesuai ERD terbaru) atau **email**. Jangan dikerjakan. |

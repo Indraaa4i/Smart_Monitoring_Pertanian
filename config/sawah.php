@@ -63,4 +63,11 @@ return [
             ['icon' => 'footprints', 'title' => 'Cek sawah langsung', 'text' => 'Sambil menunggu data, periksa kondisi sawah secara manual.'],
         ],
     ],
+
+    'halaman' => [
+        'sensors' => [
+            'kelembapan' => ['sensor' => 'Sensor kelembapan · A01', 'chip' => 'Kelembapan'],
+            'ph'         => ['sensor' => 'Sensor pH · A02',         'chip' => 'pH tanah'],
+        ],
+    ],
 ];
