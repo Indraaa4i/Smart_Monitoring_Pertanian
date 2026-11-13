@@ -300,3 +300,33 @@ pesan `Unable to locate a class or view for component [app-layout]`.
   Beranda; tidak membuat komponen baru.
 - Jika Lead menginginkan pendekatan lain (misalnya membuat komponen
   `app-layout`), perbaikan ini bisa disesuaikan.
+
+## 8. Perbaikan T14 & T15 — Halaman Kondisi Tanah dan Rekomendasi
+
+**Masalah:** Variabel `phase` di kedua controller (`KondisiTanahController` dan `RekomendasiController`) ditetapkan sebagai `null`, sehingga info "Hari ke-N" tanam tidak tampil di topbar. Perlu dihitung dari `lahan.tanggal_tanam` + `config('sawah.phases')` sesuai desain DashboardController.
+
+**Solusi:**
+
+1. **Tambah metode `phase()` ke `HalamanTanahService.php`** (baris 56-77):
+   - Menghitung hari tanam dari `lahan->tanggal_tanam` relative to today
+   - Mengembalikan `null` jika `tanggal_tanam` null
+   - Mengembalikan array `['label', 'tip', 'day', 'total']` jika ada data tanam
+
+2. **Perbaiki `KondisiTanahController.php`** (baris 13-19):
+   - Tambah `$lahan = $layanan->lahanTerpilih($request->integer('lahan'));` di awal method
+   - Gunakan `$lahan` untuk variabel `'lahan'` dan `'phase' => $layanan->phase($lahan)`
+
+3. **Perbaiki `RekomendasiController.php`** (baris 13-19):
+   - Tambah `$lahan = $layanan->lahanTerpilih($request->integer('lahan'));` di awal method
+   - Gunakan `$lahan` untuk variabel `'lahan'` dan `'phase' => $layanan->phase($lahan)`
+
+**Verifikasi:**
+- `GET /kondisi-tanah` → HTTP 200 ✅
+- `GET /rekomendasi` → HTTP 200 ✅
+- Tidak ada error "Undefined variable $lahan" ✅
+- Variabel `phase` sekarang menghitung hari ke-N sesuai desain ✅
+
+**File yang diubah:**
+- `app/Services/HalamanTanahService.php` — ditambah metode `phase()`
+- `app/Http/Controllers/KondisiTanahController.php` — diperbaiki variabel `$lahan`
+- `app/Http/Controllers/RekomendasiController.php` — diperbaiki variabel `$lahan`

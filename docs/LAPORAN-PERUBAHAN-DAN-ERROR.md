@@ -120,6 +120,7 @@ Isi halaman baru `Riwayat.blade.php` (poin penting):
 | E12 | Catatan | Breakpoint 380 px hilang; desain layout diubah `!important` | Perlu konfirmasi |
 | E13 | Catatan | `desktop.ini` ter-track di Git | Catatan |
 | E14 | Catatan | Status `AGENTS.md` (T2, `lokasi`) berbeda dari isi repo | Catatan |
+| E15 | Catatan | Variabel `$lahan` tidak terdefinisi di controller saat menambah `phase`; diperbaiki dengan menangkap return value `lahanTerpilih` ke variabel lokal sebelum dipassing ke view | Diverifikasi |
 
 ### E1 — Blocker: `<x-app-layout>` tidak ditemukan
 
