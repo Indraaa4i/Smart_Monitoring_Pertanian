@@ -330,3 +330,82 @@ pesan `Unable to locate a class or view for component [app-layout]`.
 - `app/Services/HalamanTanahService.php` — ditambah metode `phase()`
 - `app/Http/Controllers/KondisiTanahController.php` — diperbaiki variabel `$lahan`
 - `app/Http/Controllers/RekomendasiController.php` — diperbaiki variabel `$lahan`
+
+## 9. Perbaikan — Halaman Kondisi Tanah (variabel view tidak terdefinisi)
+
+**Tanggal:** 16 November 2026
+**Branch:** `fitur/perbaikan-kondisi-tanah`
+**Gejala:** membuka `/kondisi-tanah` → **HTTP 500**
+
+```text
+ErrorException: Undefined variable $jumlahPerluDitangani
+resources\views\pages\kondisi-tanah.blade.php:27
+```
+
+### 9.1 Penyebab
+
+- View `resources/views/pages/kondisi-tanah.blade.php` (versi tampilan
+  multi-blok) memakai variabel `$blok`, `$prioritas`, `$jumlahAman`,
+  `$jumlahPerhatian`, `$jumlahBahaya`, `$jumlahPerluDitangani`, `$periode`,
+  dan `$tanggal`.
+- `KondisiTanahController` hanya mengirim `lahan`, `daftarLahan`, `phase`,
+  `parameter`, dan `tanggal`. Tujuh variabel lain tidak pernah dikirim.
+- Data yang dibutuhkan sebenarnya sudah ada di
+  `HalamanTanahService::dataContohMultiBlok()`, tetapi metode itu **belum
+  pernah dipanggil**. Jadi view dan service belum tersambung ke controller.
+  Blade berhenti di variabel pertama yang gagal, sehingga error muncul satu per
+  satu (`$jumlahPerluDitangani`, lalu `$blok`, lalu `$prioritas`, dst.).
+
+### 9.2 Perbaikan
+
+`app/Http/Controllers/KondisiTanahController.php` menyambungkan data contoh
+dari service ke view:
+
+```php
+return view('pages.kondisi-tanah', [
+    // Variabel untuk topbar. `phase` samakan dengan yang diisi DashboardController.
+    'lahan'       => $lahan,
+    'daftarLahan' => $layanan->daftarLahan(),
+    'phase'       => $layanan->phase($lahan),
+
+    // Data contoh tampilan multi-blok: blok, prioritas, ringkasan, tanggal, periode.
+    ...$layanan->dataContohMultiBlok(),
+]);
+```
+
+- Kunci lama `parameter` dan `tanggal` dihapus karena view multi-blok tidak
+  lagi memakainya. `tanggal` kini berasal dari `dataContohMultiBlok()`
+  (`10 Nov 2026 · 08.30 WIB`), sesuai label "Data contoh" di header.
+- Tidak mengubah skema database, tidak menjalankan migrasi, tidak menambah
+  paket Composer/npm.
+
+### 9.3 Verifikasi
+
+Render lewat HTTP kernel Laravel (bukan menebak dari kode):
+
+```text
+kondisi-tanah => HTTP 200 | len 21245
+beranda       => HTTP 200 | len 15440
+rekomendasi   => HTTP 200 | len 11675
+riwayat       => HTTP 200 | len 13864
+```
+
+Pemeriksaan isi `/kondisi-tanah` (semua **ADA**): `blok perlu ditangani`,
+`Blok A`, `Blok B`, `Blok C`, `Periksa blok C segera`, `10 Nov 2026`.
+
+### 9.4 Temuan tambahan (belum diperbaiki, butuh keputusan)
+
+- `resources/views/layouts/app.blade.php` baris 12–13 memanggil
+  `trim(View::getSection('page-title'))`. Untuk halaman yang tidak
+  mendefinisikan section `page-title`/`page-subtitle` (Beranda, Kondisi Tanah,
+  Rekomendasi), `getSection` mengembalikan `null` sehingga PHP 8.5 memunculkan
+  peringatan deprecated `trim(): Passing null`. Halaman tetap tampil dan
+  berstatus 200. Usulan perbaikan: `trim((string) View::getSection(...))`.
+- `resources/views/pages/kondisi-tanah.blade.php` masih memakai data contoh dan
+  grafik ilustrasi (memang diberi keterangan "Data contoh" di halaman).
+- Perubahan `resources/views/pages/kondisi-tanah.blade.php`,
+  `app/Services/HalamanTanahService.php`, dan `resources/css/smart-sawah.css`
+  sudah ada di working tree sebelum perbaikan ini dan belum di-commit.
+
+**File yang diubah pada perbaikan ini:**
+- `app/Http/Controllers/KondisiTanahController.php`
