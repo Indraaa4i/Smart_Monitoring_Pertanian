@@ -91,4 +91,72 @@ class HalamanTanahService
     {
         return rtrim(rtrim(number_format($nilai, 1, ',', '.'), '0'), ',');
     }
+
+    public function dataContohMultiBlok(): array
+{
+    // Data contoh untuk tampilan multi-blok
+    return [
+        'blok' => [
+            [
+                'nama' => 'Blok A',
+                'kelembapan' => 68,
+                'ph' => 6.4,
+                'status' => 'safe',
+                'label_status' => 'Aman',
+                'keterangan' => 'Kondisi ideal',
+                'rekomendasi' => 'Pertahankan kondisi tanah.',
+                'sensor_status' => 'Online · 08.30',
+                'sensor_id' => 'A01 / A02',
+                'waktu' => '08.30 WIB',
+                'online' => true,
+            ],
+            [
+                'nama' => 'Blok B',
+                'kelembapan' => 52,
+                'ph' => 5.3,
+                'status' => 'warning',
+                'label_status' => 'Perhatian',
+                'keterangan' => 'Tanah mulai kering dan asam',
+                'rekomendasi' => 'Periksa aliran air dan kondisi keasaman tanah.',
+                'sensor_status' => 'Online · 08.30',
+                'sensor_id' => 'B01 / B02',
+                'waktu' => '08.30 WIB',
+                'online' => true,
+            ],
+            [
+                'nama' => 'Blok C',
+                'kelembapan' => 38,
+                'ph' => 4.8,
+                'status' => 'danger',
+                'label_status' => 'Bahaya',
+                'keterangan' => 'Tanah kering dan terlalu asam',
+                'rekomendasi' => 'Periksa sensor dan kondisi lahan.',
+                'sensor_status' => 'Terputus · 08.15',
+                'sensor_id' => 'C01 / C02',
+                'waktu' => '08.15 WIB (terakhir)',
+                'online' => false,
+            ],
+        ],
+
+        'prioritas' => [
+            [
+                'judul' => 'Periksa blok C segera',
+                'deskripsi' => 'Sensor terputus. Periksa kondisi sensor dan lahan.',
+                'status' => 'danger',
+            ],
+            [
+                'judul' => 'Tinjau kondisi blok B',
+                'deskripsi' => 'Kelembapan rendah dan pH mulai asam.',
+                'status' => 'warning',
+            ],
+        ],
+
+        'jumlahAman' => 1,
+        'jumlahPerhatian' => 1,
+        'jumlahBahaya' => 1,
+        'jumlahPerluDitangani' => 2,
+        'tanggal' => '10 Nov 2026 · 08.30 WIB',
+        'periode' => '10 Nov 2026 · 06.30–08.30 WIB',
+    ];
+}
 }
