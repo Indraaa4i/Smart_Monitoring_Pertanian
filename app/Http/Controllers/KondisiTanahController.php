@@ -18,8 +18,8 @@ class KondisiTanahController extends Controller
             'daftarLahan' => $layanan->daftarLahan(),
             'phase'       => $layanan->phase($lahan),
 
-            'parameter'   => $layanan->parameterOffline(),
-            'tanggal'     => $layanan->tanggalPanjang(),
+            // Data contoh tampilan multi-blok: blok, prioritas, ringkasan, tanggal, periode.
+            ...$layanan->dataContohMultiBlok(),
         ]);
     }
 }
