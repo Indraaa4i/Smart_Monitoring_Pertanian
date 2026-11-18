@@ -9,8 +9,8 @@
     @vite(['resources/css/smart-sawah.css', 'resources/js/smart-sawah.js'])
 </head>
 @php
-    $pageTitle = trim(View::getSection('page-title'));
-    $pageSubtitle = trim(View::getSection('page-subtitle'));
+    $pageTitle = trim((string) View::getSection('page-title'));
+    $pageSubtitle = trim((string) View::getSection('page-subtitle'));
 @endphp
 <body>
     <div class="shell">
@@ -19,7 +19,10 @@
             <main class="main">
                 <x-topbar :daftar-lahan="$daftarLahan ?? collect()" :lahan="$lahan ?? null" :phase="$phase ?? null" :title="$pageTitle ?: null" :subtitle="$pageSubtitle ?: null" />
                 @yield('content')
-                <x-notice />
+                {{-- Halaman yang punya catatan kaki sendiri mengisi section 'tanpa-catatan'. --}}
+                @unless (View::hasSection('tanpa-catatan'))
+                    <x-notice />
+                @endunless
             </main>
         </div>
     </div>

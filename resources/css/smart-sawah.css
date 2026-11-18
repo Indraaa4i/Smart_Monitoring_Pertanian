@@ -882,3 +882,118 @@ a { color: inherit; text-decoration: none; }
         flex-direction: column;
     }
 }
+
+/* ===== Halaman Fase Tanam: ringkasan dan modal detail siklus (desain 10 Nov 2026) ===== */
+:root {
+    --siklus-bg: #e3f5e8;
+    --garis-tegas: #cfe3d7;
+}
+
+.halaman-kepala { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 4px 4px 0; }
+.halaman-kepala__judul { margin: 6px 0 4px; font: 800 clamp(26px, 3vw, 32px)/1.15 var(--font-head); color: var(--green-900); }
+.remah { margin: 0; color: var(--muted); font-size: 12px; }
+.lencana-hijau { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--green-100); color: var(--green-700); font-weight: 700; font-size: 12px; }
+
+/* Tombol */
+.btn-fase { display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px; border: 1px solid var(--garis-tegas); border-radius: 10px; background: #fff; color: var(--green-900); font: 600 14px var(--font-body); text-decoration: none; cursor: pointer; transition: background .15s; }
+.btn-fase:hover { background: var(--green-50); }
+.btn-fase--utama { border-color: var(--green-700); background: var(--green-700); color: #fff; }
+.btn-fase--utama:hover { background: var(--green-900); }
+.btn-fase--penuh { width: 100%; }
+.btn-fase[aria-disabled="true"] { cursor: not-allowed; }
+.btn-fase[aria-disabled="true"]:hover { background: #fff; }
+.btn-fase--utama[aria-disabled="true"]:hover { background: var(--green-700); }
+
+/* Card siklus aktif */
+.siklus-aktif { display: grid; gap: 12px; background: var(--siklus-bg); }
+.siklus-aktif__judul { font: 700 24px/1.2 var(--font-head); color: var(--green-900); }
+.siklus-aktif__progres { margin-top: 6px; color: var(--green-700); font-weight: 700; font-size: 14px; }
+.bar { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.bar__isi { display: block; height: 100%; border-radius: 999px; background: var(--green-700); }
+.siklus-aktif__aksi { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+
+/* Modal detail siklus (elemen <dialog> bawaan browser) */
+.modal-siklus { width: min(600px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--line); border-radius: 18px; background: #fff; color: var(--ink); box-shadow: 0 20px 60px rgba(15, 74, 41, .25); overflow: auto; }
+.modal-siklus::backdrop { background: rgba(15, 30, 20, .45); }
+.modal-siklus__isi { display: grid; gap: 16px; padding: 28px; }
+.modal-siklus__judul { font: 700 24px/1.2 var(--font-head); color: var(--green-900); }
+.modal-siklus__sub { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.modal-siklus__kolom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; margin: 0; }
+.kolom-detail { margin: 0; }
+.kolom-detail dt { font-weight: 500; font-size: 13px; }
+.kolom-detail__nilai { margin: 6px 0 0; padding: 13px 16px; border: 1px solid var(--garis-tegas); border-radius: 12px; font-size: 15px; overflow-wrap: anywhere; }
+.modal-siklus__catatan { padding: 14px 16px; border-radius: 12px; background: #f1f4f1; color: var(--muted); font-size: 14px; }
+.modal-siklus__tahap { display: grid; gap: 10px; }
+.modal-siklus form { margin: 0; }
+body.modal-terbuka { overflow: hidden; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .modal-siklus[open] { animation: modal-masuk .18s ease-out; }
+    @keyframes modal-masuk { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+@media (max-width: 480px) {
+    .modal-siklus__isi { padding: 20px; }
+    .modal-siklus__kolom { grid-template-columns: minmax(0, 1fr); }
+    .siklus-aktif__aksi .btn-fase { flex: 1 1 100%; }
+}
+
+/* ===== Fase Tanam: header, tab, kartu ringkasan, progres tahapan, aktivitas (Figma 10 Nov 2026) ===== */
+.catatan { margin: 0; padding: 0 4px; color: var(--muted); font-size: 12px; }
+.halaman-kepala__judul { margin-bottom: 2px; }
+.halaman-kepala .muted--xs { margin-top: 12px; }
+.btn-fase--kecil { padding: 9px 16px; border-radius: 8px; font-size: 13px; }
+
+/* Tab bagian */
+.fase-tab { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 8px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); }
+.fase-tab__item { display: flex; align-items: center; justify-content: center; min-height: 42px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--green-900); font: 600 13px var(--font-body); text-align: center; text-decoration: none; cursor: default; }
+.fase-tab__item[aria-disabled="true"] { cursor: not-allowed; }
+.fase-tab__item.is-active { border-color: var(--green-700); background: var(--green-700); color: #fff; cursor: pointer; }
+
+/* Kartu ringkasan */
+.fase-kartu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.fase-kartu__item { display: grid; align-content: start; gap: 14px; padding: 22px 20px; }
+.fase-kartu__judul { margin: 0; font: 600 17px/1.3 var(--font-head); color: var(--green-900); }
+.fase-kartu__nilai { margin: 0; font: 800 28px/1.15 var(--font-head); color: var(--green-700); }
+.fase-kartu__item .muted { margin: 0; }
+
+/* Seksi umum: progres tahapan dan aktivitas */
+.fase-seksi { display: grid; gap: 6px; padding: 22px 20px; }
+.fase-seksi__judul { margin: 0; font: 700 18px/1.3 var(--font-head); color: var(--green-900); }
+.fase-seksi > .muted { margin: 0; }
+
+/* Progres tahapan */
+.fase-tahapan { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
+.fase-tahapan__item { display: grid; align-content: start; justify-items: start; gap: 8px; padding: 14px 12px; border-radius: 14px; background: #f3f6f3; }
+.fase-tahapan__item.is-berlangsung { background: var(--siklus-bg); }
+.fase-tahapan__nama { margin: 0; font: 600 14px/1.3 var(--font-head); color: var(--green-900); }
+.fase-tahapan__item .muted { margin: 0; }
+.fase-tahapan__item .btn-fase { margin-top: 6px; }
+
+/* Aktivitas terdekat */
+.fase-tabel-bungkus { margin-top: 12px; overflow-x: auto; }
+.fase-tabel { width: 100%; min-width: 640px; table-layout: fixed; border-collapse: collapse; text-align: left; }
+.fase-tabel thead th { padding: 12px; background: #f3f6f3; color: var(--muted); font-weight: 500; font-size: 12px; }
+.fase-tabel thead th:first-child { border-radius: 10px 0 0 10px; }
+.fase-tabel thead th:last-child { border-radius: 0 10px 10px 0; }
+.fase-tabel td, .fase-tabel tbody th { padding: 14px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; }
+.fase-tabel tbody th { color: var(--green-900); font-weight: 600; }
+.lencana-fase { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 12px; white-space: nowrap; }
+.lencana-fase--hijau { background: var(--green-100); color: var(--green-700); }
+.lencana-fase--merah { background: #fde8e8; color: #b42318; }
+.lencana-fase--kuning { background: #fdf0c8; color: #9a5b07; }
+
+@media (max-width: 1100px) {
+    .fase-tahapan { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+    .fase-tab { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fase-kartu { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+    .fase-kartu { grid-template-columns: minmax(0, 1fr); }
+    .fase-tahapan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+    .fase-tahapan { grid-template-columns: minmax(0, 1fr); }
+}

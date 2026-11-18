@@ -51,6 +51,8 @@ Dashboard pemantauan kelembapan dan pH tanah sawah berbasis web-IoT untuk petani
 | Rekomendasi tersimpan | Belum | Tabel menyusul. Saran saat ini berasal dari `config/sawah.php`. |
 | Login petani | Belum | T6. |
 | Halaman Riwayat | UI statis (demo) | Data hardcoded. Disambung ke data nyata setelah tabel `data_sensor` aktif (T12). |
+| Menu Fase Tanam di sidebar + route + halaman placeholder | Selesai (placeholder) | Sudah di `main`: `Route::view('/fase-tanam', 'pages.FaseTanam')`. Akan diganti controller oleh T16. |
+| Fase Tanam: ringkasan + modal Detail siklus | UI contoh | Data dari `config/sawah_fase_tanam.php`, belum database. Modal memakai elemen `<dialog>`. Tab lain (Siklus tanam, Persiapan lahan, dst.) belum dibuat. |
 | Halaman Kondisi Tanah, Rekomendasi | Placeholder | Belum ada desain. |
 
 ## 3. Struktur proyek
@@ -62,6 +64,8 @@ app/Models/                            Petani, Lahan, Sensor, DataSensor, Rekome
 app/Services/DashboardService.php      semua logika data Beranda
 app/Services/WeatherService.php        klien API BMKG + cache
 config/sawah.php                       batas aman, teks saran, definisi parameter, konfigurasi cuaca
+config/sawah_fase_tanam.php            data contoh halaman Fase Tanam (sementara, sampai ada tabel musim_tanam)
+app/Services/FaseTanamService.php      data siklus aktif untuk halaman Fase Tanam
 database/migrations/                   2 migrasi aktif (petani, lahan) + bawaan Laravel (cache, sessions, jobs)
 database/menyusul/                     migrasi + seeder tabel yang belum diaktifkan
 database/seeders/SawahSeeder.php
@@ -174,8 +178,8 @@ Format laporan ke pemilik proyek:
 | T11 | SELESAI | Pemilik memutuskan tampilan saat ini (full width, sudut tidak membulat, ikon sidebar bulat) sebagai desain yang berlaku dan menyesuaikan Figma. Tidak perlu konfirmasi lagi. |
 | T12 | MENUNGGU | Sambungkan Riwayat ke data nyata lewat service setelah T4. Ganti tanggal hardcoded dengan `now()`. |
 | T13 | MENUNGGU (prioritas rendah) | Rapikan CSS dari `46a8b36` tanpa mengubah tampilan: hilangkan `!important` dengan memperbaiki aturan sumbernya, dan kembalikan blok 380 px (daftar menu sidebar satu kolom di layar sangat kecil). Verifikasi dengan membandingkan tangkapan layar sebelum dan sesudah di lebar 1440, 1024, 768, 375 px. |
-| T14 | SELESAI | Sudah diverifikasi: `phase` dihitung dari `HalamanTanahService->phase()` dan kedua controller return 200. Error "Undefined variable $lahan" sudah diperbaiki dengan menangkap variabel lahan terlebih dahulu. |
-| T15 | SELESAI | Sudah diverifikasi: `phase` dihitung dari `HalamanTanahService->phase()` dan kedua controller return 200. Error "Undefined variable $lahan" sudah diperbaiki dengan menangkap variabel lahan terlebih dahulu. |
+| T16 | **AKTIF** | Menu, route, dan placeholder `pages/FaseTanam.blade.php` sudah ada di `main`. **Ganti, jangan tambah**: ubah `Route::view` menjadi `Route::get('/fase-tanam', FaseTanamController::class)` dengan nama route yang sama (`fase-tanam`), hapus placeholder dengan `git rm`, pakai `pages/fase-tanam.blade.php`, dan jangan menambah item sidebar kedua. Urutan menu mengikuti Figma: Beranda, Kondisi Tanah, Rekomendasi, Fase Tanam, Riwayat. Isi tugas: card siklus aktif + modal Detail siklus (`<dialog>`), mengikuti Figma 10 Nov 2026. Tombol tahap di modal otomatis menjadi tautan bila route `fase-tanam.*` ada, selain itu nonaktif. Tombol Catat pemeliharaan tidak boleh terpengaruh modal. Data dari config (contoh). Jangan membuat tabel baru. |
+| T17 | MENUNGGU | Halaman detail tiap tahap (Persiapan lahan, Persemaian bibit, Penanaman, Pemeliharaan), form Catat pemeliharaan, dan tabel `musim_tanam`. Butuh usulan skema dan persetujuan Lead. |
 | T4 | MENUNGGU | Aktifkan `sensor`, `data_sensor`, `rekomendasi`: pindahkan migrasi dari `database/menyusul/` ke `database/migrations/` lalu `php artisan migrate` (tanpa `fresh`). Butuh persetujuan. |
 | T5 | MENUNGGU | Endpoint HTTP penerima data IoT (`POST` JSON, token per perangkat, simpan ke `data_sensor`, `lahan_id` dari sensor, idempoten lewat UNIQUE sensor+waktu). Butuh spesifikasi dari Lead. |
 | T6 | MENUNGGU | Login petani. Pemilik proyek belum memutuskan **username** (sesuai ERD terbaru) atau **email**. Jangan dikerjakan. |
@@ -201,3 +205,5 @@ Format laporan ke pemilik proyek:
 | 2026-10-22 | Tambah daftar fitur (bagian 2). Bagian 6 menjadi fitur Cuaca BMKG. Tambah bagian 11. |
 | 2026-11-05 | Tinjauan laporan tim: perbaikan E1, E3, E4, E5, E6 diterima. Keputusan E2 (T1), E9 (T8), E13 (T9). Tambah T8-T12, aturan branch/PR, larangan skrip pemasang dan test ke database utama. Riwayat dicatat sebagai UI statis. |
 | 2026-11-06 | Pemilik menetapkan tampilan `main` saat ini sebagai desain yang berlaku; Figma disesuaikan. T11 selesai; tambah T13 (rapikan `!important` dan breakpoint 380 px, opsional). |
+| 2026-11-10 | Tambah T16 (modal Detail siklus) dan T17. Fase Tanam dicatat sebagai UI contoh dari config. |
+| 2026-11-10 | Menu Fase Tanam, route, dan placeholder dicatat (sudah di `main`, dipush langsung; mulai sekarang wajib branch dan Pull Request). T16 disesuaikan: mengganti placeholder, bukan menambah. |

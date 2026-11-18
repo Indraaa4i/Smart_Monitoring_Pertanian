@@ -97,7 +97,7 @@ class DashboardService
         ];
     }
 
-    private function phase(Lahan $lahan): ?array
+    public function phase(Lahan $lahan): ?array
     {
         if ($lahan->tanggal_tanam === null) {
             return null;

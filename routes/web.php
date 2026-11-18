@@ -2,6 +2,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FaseTanamController;
 use App\Http\Controllers\KondisiTanahController;
 use App\Http\Controllers\RekomendasiController;
 use Illuminate\Support\Facades\Route;
@@ -13,8 +14,8 @@ Route::get('/', DashboardController::class)->name('beranda');
 Route::get('/kondisi-tanah', KondisiTanahController::class)
     ->name('kondisi-tanah');
 
-// Fase Tanam (Placeholder)
-Route::view('/fase-tanam', 'pages.FaseTanam')
+// Fase Tanam
+Route::get('/fase-tanam', FaseTanamController::class)
     ->name('fase-tanam');
 
 // Rekomendasi

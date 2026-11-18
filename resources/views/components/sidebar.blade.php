@@ -3,8 +3,8 @@
     $items = [
         ['route' => 'beranda', 'label' => 'Beranda', 'icon' => 'home'],
         ['route' => 'kondisi-tanah', 'label' => 'Kondisi Tanah', 'icon' => 'droplet'],
-        ['route' => 'fase-tanam', 'label' => 'Fase Tanam', 'icon' => 'sprout'],
         ['route' => 'rekomendasi', 'label' => 'Rekomendasi', 'icon' => 'bulb'],
+        ['route' => 'fase-tanam', 'label' => 'Fase Tanam', 'icon' => 'sprout'],
         ['route' => 'riwayat', 'label' => 'Riwayat', 'icon' => 'clock'],
     ];
 @endphp
