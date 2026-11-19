@@ -1,4 +1,3 @@
-
 <?php
 
 use App\Http\Controllers\DashboardController;
@@ -17,6 +16,10 @@ Route::get('/kondisi-tanah', KondisiTanahController::class)
 // Fase Tanam
 Route::get('/fase-tanam', FaseTanamController::class)
     ->name('fase-tanam');
+
+// Fase Tanam > Penanaman
+Route::get('/fase-tanam/penanaman', [FaseTanamController::class, 'penanaman'])
+    ->name('fase-tanam.penanaman');
 
 // Rekomendasi
 Route::get('/rekomendasi', RekomendasiController::class)

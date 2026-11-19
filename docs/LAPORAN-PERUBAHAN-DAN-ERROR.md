@@ -14,6 +14,54 @@
 
 ---
 
+## 0. Penyelesaian konflik merge (19 November 2026)
+
+**Konteks:** saat pemeriksaan, repositori berada di branch
+`fitur/perbaikan-kondisi-tanah` (`e1c06ab`) dengan operasi merge
+`origin/main` (`967fb94`) **sedang berjalan** (`MERGE_HEAD` ada). Satu file
+berstatus `UU`: `app/Services/FaseTanamRingkasanService.php`. Tiga file
+lainnya sudah ter-stage dari `main`: `app/Http/Controllers/FaseTanamController.php`,
+`resources/views/pages/penanaman.blade.php`, dan `routes/web.php`.
+
+**Penyebab konflik:** kedua cabang mengubah method `dataContoh()` / `tab()`
+pada service yang sama. Cabang fitur menambahkan parameter `$tabAktif` dan
+tautan tab **Siklus tanam**; `main` menambahkan tautan tab **Penanaman**.
+
+**Yang dilakukan:**
+
+- Isi file sumber **tidak diubah**. Hasil gabungan sudah ada di working tree
+  (parameter `$tabAktif` + tautan Siklus dari fitur, tautan Penanaman dari
+  `main`), sehingga cukup ditandai selesai dengan
+  `git add app/Services/FaseTanamRingkasanService.php`.
+- Tidak ada perubahan pada CSS, JavaScript, Blade, atau gaya visual. Tampilan
+  web tidak diubah.
+- Satu-satunya file yang isinya diubah adalah
+  `docs/LAPORAN-PERUBAHAN-DAN-ERROR.md` (dokumentasi ini), sesuai permintaan.
+
+**Verifikasi:**
+
+```text
+php -l app/Http/Controllers/FaseTanamController.php ................ OK
+php -l app/Services/FaseTanamRingkasanService.php ................. OK
+php -l app/Services/FaseTanamSiklusService.php .................... OK
+php -l routes/web.php ............................................ OK
+php artisan route:list --except-vendor ........................... 6 route, OK
+Render /fase-tanam (app()->call controller) ...................... OK
+Render /fase-tanam/penanaman (app()->call controller) ............ OK
+Pencarian penanda konflik (<<<<<<<|=======|>>>>>>>) .............. kosong
+git diff --check / git diff --cached --check ..................... bersih
+git status --short --branch ...................................... tidak ada UU
+```
+
+**Status yang belum selesai:** merge belum di-commit. `main` lokal masih di
+`e2f4854` dan tertinggal 8 commit dari `origin/main` (`967fb94`). Branch fitur
+**belum** tergabung ke `main`. Sesuai `AGENTS.md` bagian 0 butir 7, penggabungan
+ke `main` harus lewat Pull Request, bukan commit langsung; perlu keputusan
+apakah merge di-commit dan di-push ke branch fitur agar PR GitHub selesai,
+atau ada instruksi lain dari pemilik.
+
+---
+
 ## 1. Ringkasan
 
 1. Ada **3 perubahan yang belum di-commit**: `routes/web.php`, `resources/css/smart-sawah.css`, dan file baru `resources/views/pages/Riwayat.blade.php`.
