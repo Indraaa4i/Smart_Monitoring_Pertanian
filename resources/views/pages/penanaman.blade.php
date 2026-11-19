@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('title', 'Penanaman')
+@section('tanpa-catatan', '1')
+
 @section('content')
 <style>
     .pn-card{background:#fff;border:1px solid #e6ece8;border-radius:16px;padding:20px;margin-top:16px}
@@ -24,16 +27,19 @@
     @media(max-width:768px){.pn-grid{grid-template-columns:1fr}}
 </style>
 
-<div>
-    <p style="font-size:12px;color:#6b7c74;margin:0">Fase Tanam / Penanaman</p>
-    <h1 style="font-size:32px;color:#14352a;margin:4px 0">Penanaman</h1>
-    <p style="font-size:14px;color:#6b7c74;margin:0">Catat pelaksanaan pindah tanam di setiap blok lahan.</p>
-    <p style="font-size:12px;color:#6b7c74;margin:8px 0 0">
-        {{ now('Asia/Jakarta')->format('H.i') }} WIB
-    </p>
-</div>
+<header class="halaman-kepala">
+    <div>
+        <p class="remah">Fase Tanam / Penanaman</p>
+        <h1 class="halaman-kepala__judul">Penanaman</h1>
+        <p class="muted">Catat pelaksanaan pindah tanam di setiap blok lahan.</p>
+        <p class="muted muted--xs">{{ $waktu }}</p>
+    </div>
+    @if ($contoh)
+        <span class="lencana-hijau">Data contoh</span>
+    @endif
+</header>
 
-{{-- TAB: pakai komponen yang sama dengan pages/fase-tanam.blade.php (lihat bagian 5) --}}
+<x-fase-tab :tab="$tab" />
 
 <div class="pn-bar">
     <span class="pn-select">{{ $penanaman['siklus'] }} · {{ $penanaman['blok'] }}</span>
@@ -131,7 +137,7 @@
     <a href="#" class="pn-btn">Periksa kesiapan bibit</a>
 </div>
 
-<p style="font-size:11px;color:#6b7c74;margin-top:16px">
-    Data demonstrasi · Pembaruan sensor {{ $sekarang->translatedFormat('j M Y') }}, {{ $sekarang->format('H.i') }} WIB. Semua waktu dalam WIB.
-</p>
+@if ($contoh)
+    <p class="catatan">Data demonstrasi · Pembaruan sensor {{ $waktu }}. Semua waktu dalam WIB.</p>
+@endif
 @endsection
