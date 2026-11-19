@@ -21,9 +21,13 @@ Route::get('/fase-tanam', FaseTanamController::class)
 Route::get('/fase-tanam/penanaman', [FaseTanamController::class, 'penanaman'])
     ->name('fase-tanam.penanaman');
 
-    Route::get('/fase-tanam/persemaian-bibit', [FaseTanamController::class, 'persemaian'])
+// Fase Tanam > Persemaian Bibit
+Route::get('/fase-tanam/persemaian-bibit', [FaseTanamController::class, 'persemaian'])
     ->name('fase-tanam.persemaian');
-    
+
+Route::post('/fase-tanam/persemaian-bibit', [FaseTanamController::class, 'storePersemaian'])
+    ->name('fase-tanam.persemaian.store');
+
 // Rekomendasi
 Route::get('/rekomendasi', RekomendasiController::class)
     ->name('rekomendasi');
