@@ -29,15 +29,22 @@ class FaseTanamRingkasanService
         ];
     }
 
-    /** Tab bagian Fase Tanam. Hanya Ringkasan yang sudah punya halaman. */
+    /** Tab bagian Fase Tanam. */
     private function tab(): array
     {
         return [
-            ['label' => 'Ringkasan', 'aktif' => true, 'url' => route('fase-tanam')],
+            [
+                'label' => 'Ringkasan',
+                'aktif' => true,
+                'url'   => route('fase-tanam'),
+            ],
             ['label' => 'Siklus tanam'],
             ['label' => 'Persiapan lahan'],
             ['label' => 'Persemaian bibit'],
-            ['label' => 'Penanaman'],
+            [
+                'label' => 'Penanaman',
+                'url'   => route('fase-tanam.penanaman'),
+            ],
             ['label' => 'Pemeliharaan'],
             ['label' => 'Jadwal & aktivitas'],
             ['label' => 'Riwayat tanam'],
@@ -47,24 +54,60 @@ class FaseTanamRingkasanService
     private function kartu(): array
     {
         return [
-            ['judul' => 'Siklus aktif', 'nilai' => '2 siklus', 'ket' => 'Blok A dan Blok B'],
-            ['judul' => 'Luas dikelola', 'nilai' => '2,5 ha', 'ket' => '3 blok termasuk 1 rencana'],
-            ['judul' => 'Kegiatan hari ini', 'nilai' => '3 kegiatan', 'ket' => '1 selesai · 2 menunggu'],
-            ['judul' => 'Panen terdekat', 'nilai' => '22 Feb 2027', 'ket' => 'Perkiraan · Blok A'],
+            [
+                'judul' => 'Siklus aktif',
+                'nilai' => '2 siklus',
+                'ket'   => 'Blok A dan Blok B',
+            ],
+            [
+                'judul' => 'Luas dikelola',
+                'nilai' => '2,5 ha',
+                'ket'   => '3 blok termasuk 1 rencana',
+            ],
+            [
+                'judul' => 'Kegiatan hari ini',
+                'nilai' => '3 kegiatan',
+                'ket'   => '1 selesai · 2 menunggu',
+            ],
+            [
+                'judul' => 'Panen terdekat',
+                'nilai' => '22 Feb 2027',
+                'ket'   => 'Perkiraan · Blok A',
+            ],
         ];
     }
 
     private function tahapan(): array
     {
-        // Isi 'url' pada tahap yang halaman detailnya sudah tersedia; tombol otomatis menjadi tautan.
+        // Isi 'url' pada tahap yang halaman detailnya sudah tersedia.
         return [
             'keterangan' => 'Siklus MH-2026-A · Tahap panen diselesaikan saat siklus ditutup.',
             'daftar' => [
-                ['nama' => 'Persiapan lahan', 'meta' => '20–28 Okt · Selesai', 'status' => 'selesai'],
-                ['nama' => 'Persemaian bibit', 'meta' => '15 Okt–3 Nov · Selesai', 'status' => 'selesai'],
-                ['nama' => 'Penanaman', 'meta' => '4 Nov · Selesai', 'status' => 'selesai'],
-                ['nama' => 'Pemeliharaan', 'meta' => $this->hst().' HST · Berlangsung', 'status' => 'berlangsung'],
-                ['nama' => 'Panen & evaluasi', 'meta' => '22 Feb 2027 · Rencana', 'status' => 'rencana'],
+                [
+                    'nama'   => 'Persiapan lahan',
+                    'meta'   => '20–28 Okt · Selesai',
+                    'status' => 'selesai',
+                ],
+                [
+                    'nama'   => 'Persemaian bibit',
+                    'meta'   => '15 Okt–3 Nov · Selesai',
+                    'status' => 'selesai',
+                ],
+                [
+                    'nama'   => 'Penanaman',
+                    'meta'   => '4 Nov · Selesai',
+                    'status' => 'selesai',
+                ],
+                [
+                    'nama'   => 'Pemeliharaan',
+                    'meta'   => $this->hst().' HST · Berlangsung',
+                    'status' => 'berlangsung',
+                ],
+                [
+                    'nama'   => 'Panen & evaluasi',
+                    'meta'   => '22 Feb 2027 · Rencana',
+                    'status' => 'rencana',
+                ],
             ],
         ];
     }
@@ -77,23 +120,41 @@ class FaseTanamRingkasanService
                 [
                     'kegiatan'  => 'Periksa tinggi air',
                     'lahan'     => 'Blok A · Hari ini, 07.00',
-                    'prioritas' => ['teks' => 'Normal', 'warna' => 'hijau'],
-                    'status'    => ['teks' => 'Selesai', 'warna' => 'hijau'],
-                    'aksi'      => 'Lihat jadwal',
+                    'prioritas' => [
+                        'teks'  => 'Normal',
+                        'warna'  => 'hijau',
+                    ],
+                    'status' => [
+                        'teks'  => 'Selesai',
+                        'warna'  => 'hijau',
+                    ],
+                    'aksi' => 'Lihat jadwal',
                 ],
                 [
                     'kegiatan'  => 'Pemeriksaan hama',
                     'lahan'     => 'Blok A · Hari ini, 15.00',
-                    'prioritas' => ['teks' => 'Tinggi', 'warna' => 'merah'],
-                    'status'    => ['teks' => 'Menunggu', 'warna' => 'kuning'],
-                    'aksi'      => 'Lihat jadwal',
+                    'prioritas' => [
+                        'teks'  => 'Tinggi',
+                        'warna'  => 'merah',
+                    ],
+                    'status' => [
+                        'teks'  => 'Menunggu',
+                        'warna'  => 'kuning',
+                    ],
+                    'aksi' => 'Lihat jadwal',
                 ],
                 [
                     'kegiatan'  => 'Periksa bibit',
                     'lahan'     => 'Blok B · Hari ini, 16.00',
-                    'prioritas' => ['teks' => 'Normal', 'warna' => 'hijau'],
-                    'status'    => ['teks' => 'Menunggu', 'warna' => 'kuning'],
-                    'aksi'      => 'Lihat bibit',
+                    'prioritas' => [
+                        'teks'  => 'Normal',
+                        'warna'  => 'hijau',
+                    ],
+                    'status' => [
+                        'teks'  => 'Menunggu',
+                        'warna'  => 'kuning',
+                    ],
+                    'aksi' => 'Lihat bibit',
                 ],
             ],
         ];
@@ -103,7 +164,12 @@ class FaseTanamRingkasanService
     private function hst(): int
     {
         $tz = 'Asia/Jakarta';
-        $tanam = CarbonImmutable::parse(self::TANGGAL_TANAM, $tz)->startOfDay();
+
+        $tanam = CarbonImmutable::parse(
+            self::TANGGAL_TANAM,
+            $tz
+        )->startOfDay();
+
         $hariIni = CarbonImmutable::now($tz)->startOfDay();
 
         return max(0, (int) $tanam->diffInDays($hariIni));
