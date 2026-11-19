@@ -19,10 +19,10 @@ class FaseTanamRingkasanService
     /**
      * @return array{tab: array, kartu: array, tahapan: array, aktivitas: array}
      */
-    public function dataContoh(): array
+    public function dataContoh(string $tabAktif = 'ringkasan'): array
     {
         return [
-            'tab'       => $this->tab(),
+            'tab' => $this->tab($tabAktif),
             'kartu'     => $this->kartu(),
             'tahapan'   => $this->tahapan(),
             'aktivitas' => $this->aktivitas(),
@@ -30,20 +30,27 @@ class FaseTanamRingkasanService
     }
 
     /** Tab bagian Fase Tanam. Hanya Ringkasan yang sudah punya halaman. */
-    private function tab(): array
-    {
-        return [
-            ['label' => 'Ringkasan', 'aktif' => true, 'url' => route('fase-tanam')],
-            ['label' => 'Siklus tanam'],
-            ['label' => 'Persiapan lahan'],
-            ['label' => 'Persemaian bibit'],
-            ['label' => 'Penanaman'],
-            ['label' => 'Pemeliharaan'],
-            ['label' => 'Jadwal & aktivitas'],
-            ['label' => 'Riwayat tanam'],
-        ];
-    }
-
+    private function tab(string $tabAktif = 'ringkasan'): array
+{
+    return [
+        [
+            'label' => 'Ringkasan',
+            'aktif' => $tabAktif === 'ringkasan',
+            'url' => route('fase-tanam'),
+        ],
+        [
+            'label' => 'Siklus tanam',
+            'aktif' => $tabAktif === 'siklus',
+            'url' => route('fase-tanam', ['tab' => 'siklus']),
+        ],
+        ['label' => 'Persiapan lahan'],
+        ['label' => 'Persemaian bibit'],
+        ['label' => 'Penanaman'],
+        ['label' => 'Pemeliharaan'],
+        ['label' => 'Jadwal & aktivitas'],
+        ['label' => 'Riwayat tanam'],
+    ];
+}
     private function kartu(): array
     {
         return [

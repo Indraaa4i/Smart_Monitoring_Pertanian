@@ -33,4 +33,47 @@ return [
 
         'rute_catat_pemeliharaan' => 'fase-tanam.pemeliharaan.baru',
     ],
+    
+    'daftar_siklus' => [
+        [
+            'id' => 'MH-2026-A',
+            'nama' => 'MH-2026-A',
+            'lahan' => 'Blok A',
+            'varietas' => 'Inpari 32',
+            'luas_ha' => 1.2,
+            'mulai' => '2026-10-20',
+            'akhir' => '2027-02-22',
+            'tahap' => 'Pemeliharaan',
+            'status' => 'Aktif',
+            'musim' => 'Musim Hujan 2026',
+            'catatan' => 'Siklus utama Blok A.',
+        ],
+        [
+            'id' => 'MH-2026-B',
+            'nama' => 'MH-2026-B',
+            'lahan' => 'Blok B',
+            'varietas' => 'Ciherang',
+            'luas_ha' => 0.8,
+            'mulai' => '2026-10-25',
+            'akhir' => '2027-03-11',
+            'tahap' => 'Persemaian',
+            'status' => 'Aktif',
+            'musim' => 'Musim Hujan 2026',
+            'catatan' => 'Siklus Blok B.',
+        ],
+        [
+            'id' => 'MH-2026-C',
+            'nama' => 'MH-2026-C',
+            'lahan' => 'Blok C',
+            'varietas' => 'Inpari 42',
+            'luas_ha' => 0.5,
+            'mulai' => '2026-11-15',
+            'akhir' => '2027-03-20',
+            'tahap' => 'Persiapan',
+            'status' => 'Rencana',
+            'musim' => 'Musim Hujan 2026',
+            'catatan' => 'Jadwal pengolahan belum ditetapkan.',
+        ],
+    ],
+
 ];
