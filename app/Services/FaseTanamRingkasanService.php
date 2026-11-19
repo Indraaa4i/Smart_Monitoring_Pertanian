@@ -25,7 +25,7 @@ class FaseTanamRingkasanService
             'tab'       => $this->tab(),
             'kartu'     => $this->kartu(),
             'tahapan'   => $this->tahapan(),
-            'aktivitas' => $this->aktivitas(),
+            'aktivitas'  => $this->aktivitas(),
         ];
     }
 
@@ -40,7 +40,10 @@ class FaseTanamRingkasanService
             ],
             ['label' => 'Siklus tanam'],
             ['label' => 'Persiapan lahan'],
-            ['label' => 'Persemaian bibit'],
+            [
+                'label' => 'Persemaian bibit',
+                'url'   => route('fase-tanam.persemaian'),
+            ],
             [
                 'label' => 'Penanaman',
                 'url'   => route('fase-tanam.penanaman'),
@@ -155,6 +158,41 @@ class FaseTanamRingkasanService
                         'warna'  => 'kuning',
                     ],
                     'aksi' => 'Lihat bibit',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Data contoh untuk halaman Persemaian Bibit.
+     */
+    public function persemaian(): array
+    {
+        return [
+            'siklus'          => 'MH-2026-B',
+            'blok'            => 'Blok B',
+            'varietas'        => 'Ciherang',
+            'tanggal_semai'   => '2026-11-01',
+            'tanggal_periksa' => '2026-11-10',
+            'jumlah_benih'    => 20,
+            'daya_tumbuh'    => 92,
+            'kondisi'         => 'Baik',
+            'target_pindah'   => '2026-11-21',
+            'catatan'          => 'Pertumbuhan bibit baik dan merata.',
+            'riwayat' => [
+                [
+                    'tanggal'      => '10 Nov 2026',
+                    'umur'          => 9,
+                    'kondisi'      => 'Baik',
+                    'tinggi'        => '12-14 cm',
+                    'daya_tumbuh' => '92%',
+                ],
+                [
+                    'tanggal'      => '5 Nov 2026',
+                    'umur'          => 4,
+                    'kondisi'      => 'Mulai berkecambah',
+                    'tinggi'        => '3-5 cm',
+                    'daya_tumbuh' => '88%',
                 ],
             ],
         ];

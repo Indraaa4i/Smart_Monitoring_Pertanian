@@ -6,6 +6,7 @@ use App\Models\Lahan;
 use App\Services\DashboardService;
 use App\Services\FaseTanamRingkasanService;
 use App\Services\FaseTanamService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class FaseTanamController extends Controller
@@ -53,7 +54,7 @@ class FaseTanamController extends Controller
             (int) $request->query('lahan')
         ) ?? $daftarLahan->first();
 
-        $tanggalTanam = \Carbon\Carbon::create(
+        $tanggalTanam = Carbon::create(
             2026, 11, 4, 0, 0, 0, 'Asia/Jakarta'
         );
 
@@ -87,16 +88,16 @@ class FaseTanamController extends Controller
         }
         unset($item);
 
-        // Masukkan tab yang sudah disesuaikan kembali ke data
         $dataContoh['tab'] = $tab;
 
         return view('pages.penanaman', [
             'title'        => 'Penanaman',
-            'sekarang'      => now('Asia/Jakarta')->locale('id'),
+            'sekarang'     => now('Asia/Jakarta')->locale('id'),
             'daftarLahan'  => $daftarLahan,
             'lahan'        => $lahan,
-            'phase'         => $lahan ? $dashboard->phase($lahan) : null,
-            'waktu'         => now()->locale('id')
+            'phase'        => $lahan ? $dashboard->phase($lahan) : null,
+            'contoh'       => config('sawah_fase_tanam.contoh'),
+            'waktu'        => now()->locale('id')
                 ->translatedFormat('j M Y · H.i').' WIB',
 
             'penanaman'    => $penanaman,
@@ -108,6 +109,62 @@ class FaseTanamController extends Controller
             'metode'       => ['Jajar legowo 2:1', 'Jajar legowo 4:1', 'Tegel'],
 
             // Data tab dari service, dengan Penanaman aktif
+            ...$dataContoh,
+        ]);
+    }
+
+    // Halaman Persemaian Bibit
+    public function persemaian(
+        Request $request,
+        DashboardService $dashboard,
+        FaseTanamRingkasanService $ringkasan,
+    ) {
+        $daftarLahan = Lahan::orderBy('nama_lahan')->get();
+
+        $lahan = $daftarLahan->firstWhere(
+            'id',
+            (int) $request->query('lahan')
+        ) ?? $daftarLahan->first();
+
+        // Data contoh persemaian
+        $data = $ringkasan->persemaian();
+
+        // Menghitung umur bibit
+        $tanggalSemai = Carbon::parse($data['tanggal_semai'], 'Asia/Jakarta');
+        $tanggalPeriksa = Carbon::parse($data['tanggal_periksa'], 'Asia/Jakarta');
+        $umurBibit = (int) $tanggalSemai->diffInDays($tanggalPeriksa);
+
+        // Mengambil tab dari service
+        $dataContoh = $ringkasan->dataContoh();
+        $tab = $dataContoh['tab'];
+
+        // Mengatur tab Persemaian Bibit agar aktif
+        foreach ($tab as &$item) {
+            if ($item['label'] === 'Persemaian bibit') {
+                $item['url'] = route('fase-tanam.persemaian');
+                $item['aktif'] = true;
+            } else {
+                $item['aktif'] = false;
+            }
+        }
+        unset($item);
+
+        $dataContoh['tab'] = $tab;
+
+        return view('pages.persemaian-bibit', [
+            'title'        => 'Persemaian Bibit',
+            'sekarang'     => now('Asia/Jakarta')->locale('id'),
+            'daftarLahan'  => $daftarLahan,
+            'lahan'        => $lahan,
+            'phase'        => $lahan ? $dashboard->phase($lahan) : null,
+            'contoh'       => config('sawah_fase_tanam.contoh'),
+            'waktu'        => now()->locale('id')
+                ->translatedFormat('j M Y · H.i').' WIB',
+
+            'data'         => $data,
+            'umurBibit'    => $umurBibit,
+
+            // Data tab dengan Persemaian Bibit aktif
             ...$dataContoh,
         ]);
     }

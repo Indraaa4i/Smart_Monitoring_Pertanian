@@ -21,6 +21,9 @@ Route::get('/fase-tanam', FaseTanamController::class)
 Route::get('/fase-tanam/penanaman', [FaseTanamController::class, 'penanaman'])
     ->name('fase-tanam.penanaman');
 
+    Route::get('/fase-tanam/persemaian-bibit', [FaseTanamController::class, 'persemaian'])
+    ->name('fase-tanam.persemaian');
+    
 // Rekomendasi
 Route::get('/rekomendasi', RekomendasiController::class)
     ->name('rekomendasi');
