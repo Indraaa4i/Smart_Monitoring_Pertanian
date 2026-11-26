@@ -6,22 +6,19 @@ use App\Models\Lahan;
 use App\Services\DashboardService;
 use App\Services\FaseTanamRingkasanService;
 use App\Services\FaseTanamService;
-use App\Services\FaseTanamSiklusService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class FaseTanamController extends Controller
 {
-    // ==========================================
-    // HALAMAN UTAMA FASE TANAM
-    // ==========================================
-
+    // ==================================================
+    // RINGKASAN & SIKLUS TANAM
+    // ==================================================
     public function __invoke(
         Request $request,
         FaseTanamService $service,
         DashboardService $dashboard,
         FaseTanamRingkasanService $ringkasan,
-        FaseTanamSiklusService $siklusService,
     ) {
         $daftarLahan = Lahan::orderBy('nama_lahan')->get();
 
@@ -30,33 +27,143 @@ class FaseTanamController extends Controller
             (int) $request->query('lahan')
         ) ?? $daftarLahan->first();
 
-        $tabAktif = $request->query('tab') === 'siklus'
-            ? 'siklus'
-            : 'ringkasan';
+        $tabAktif = $request->query('tab', 'ringkasan');
 
-        $dataSiklus = $siklusService->data();
+        $dataContoh = $ringkasan->dataContoh($tabAktif);
+
+        // ==================================================
+        // DATA SIKLUS TANAM
+        // ==================================================
+        $dataSiklus = [
+            'summary' => [
+                'total'   => 2,
+                'aktif'   => 1,
+                'rencana' => 1,
+            ],
+
+            'siklus' => [
+                [
+                    'nama'      => 'Siklus Tanam 1',
+                    'lahan'      => 'Blok A',
+                    'musim'      => 'MH-2026-A',
+                    'varietas'   => 'Inpari 32',
+                    'luas_ha'    => 1.2,
+                    'mulai'      => '2026-11-04',
+                    'akhir'      => '2027-02-22',
+                    'tahap'      => 'Pemeliharaan',
+                    'status'     => 'Aktif',
+                    'catatan'    => 'Siklus tanam aktif pada Blok A.',
+                ],
+
+                [
+                    'nama'      => 'Siklus Tanam 2',
+                    'lahan'      => 'Blok B',
+                    'musim'      => 'MH-2026-B',
+                    'varietas'   => 'Ciherang',
+                    'luas_ha'    => 1.3,
+                    'mulai'      => '2026-11-21',
+                    'akhir'      => '2027-03-10',
+                    'tahap'      => 'Persemaian',
+                    'status'     => 'Rencana',
+                    'catatan'    => 'Bibit sedang disiapkan untuk rencana penanaman Blok B.',
+                ],
+            ],
+        ];
 
         return view('pages.fase-tanam', [
-            'daftarLahan' => $daftarLahan,
-            'lahan' => $lahan,
-            'phase' => $lahan ? $dashboard->phase($lahan) : null,
-            'siklus' => $service->siklusAktif(),
-            'contoh' => config('sawah_fase_tanam.contoh'),
-            'waktu' => now()->locale('id')
+            'title'        => 'Fase Tanam',
+            'tabAktif'     => $tabAktif,
+
+            'daftarLahan'  => $daftarLahan,
+            'lahan'         => $lahan,
+
+            'phase'         => $lahan
+                ? $dashboard->phase($lahan)
+                : null,
+
+            'siklus'        => $service->siklusAktif(),
+            'dataSiklus'    => $dataSiklus,
+
+            'contoh'        => config('sawah_fase_tanam.contoh'),
+
+            'waktu' => now('Asia/Jakarta')
+                ->locale('id')
                 ->translatedFormat('j M Y · H.i').' WIB',
 
-            'tabAktif' => $tabAktif,
-            'dataSiklus' => $dataSiklus,
-
-            ...$ringkasan->dataContoh($tabAktif),
+            ...$dataContoh,
         ]);
     }
 
 
-    // ==========================================
-    // HALAMAN PENANAMAN
-    // ==========================================
+    // ==================================================
+    // PERSEMAIAN BIBIT
+    // ==================================================
+    public function persemaian(
+        Request $request,
+        DashboardService $dashboard,
+        FaseTanamRingkasanService $ringkasan,
+    ) {
+        $daftarLahan = Lahan::orderBy('nama_lahan')->get();
 
+        $lahan = $daftarLahan->firstWhere(
+            'id',
+            (int) $request->query('lahan')
+        ) ?? $daftarLahan->first();
+
+        $persemaian = $ringkasan->persemaian();
+
+        $data = $persemaian;
+
+        // Hitung umur bibit
+        $umurBibit = Carbon::parse(
+            $persemaian['tanggal_semai'],
+            'Asia/Jakarta'
+        )->diffInDays(now('Asia/Jakarta'));
+
+        $contoh = config('sawah_fase_tanam.contoh');
+
+        // Tab navigasi
+        $dataContoh = $ringkasan->dataContoh('persemaian');
+
+        $tab = $dataContoh['tab'];
+
+        foreach ($tab as &$item) {
+            $item['aktif'] = $item['label'] === 'Persemaian bibit';
+        }
+
+        unset($item);
+
+        $dataContoh['tab'] = $tab;
+
+        return view('pages.persemaian-bibit', [
+            'title'        => 'Persemaian Bibit',
+            'tabAktif'     => 'persemaian',
+
+            'daftarLahan'  => $daftarLahan,
+            'lahan'         => $lahan,
+
+            'phase'         => $lahan
+                ? $dashboard->phase($lahan)
+                : null,
+
+            'waktu' => now('Asia/Jakarta')
+                ->locale('id')
+                ->translatedFormat('j M Y · H.i').' WIB',
+
+            'persemaian'   => $persemaian,
+            'data'          => $data,
+            'umurBibit'     => $umurBibit,
+            'contoh'        => $contoh,
+
+            ...$persemaian,
+            ...$dataContoh,
+        ]);
+    }
+
+
+    // ==================================================
+    // PENANAMAN
+    // ==================================================
     public function penanaman(
         Request $request,
         DashboardService $dashboard,
@@ -74,32 +181,27 @@ class FaseTanamController extends Controller
         );
 
         $penanaman = [
-            'blok' => 'Blok A',
-            'siklus' => 'MH-2026-A',
-            'tanggal' => $tanggalTanam,
-            'luas' => '1,2',
-            'varietas' => 'Inpari 32',
-            'metode' => 'Jajar legowo 2:1',
-            'jumlah_bibit' => 300000,
-            'jarak_tanam' => '25 × 12,5 × 50 cm',
-            'umur_bibit' => 20,
-            'catatan' => 'Penanaman merata, 2–3 bibit per lubang. Tinggi air 2 cm.',
-            'hst' => (int) $tanggalTanam->diffInDays(
+            'blok'         => 'Blok A',
+            'siklus'       => 'MH-2026-A',
+            'tanggal'      => $tanggalTanam,
+            'luas'         => '1,2',
+            'varietas'     => 'Inpari 32',
+            'metode'       => 'Jajar legowo 2:1',
+            'jumlah_bibit'  => 300000,
+            'jarak_tanam'  => '25 × 12,5 × 50 cm',
+            'umur_bibit'   => 20,
+            'catatan'      => 'Penanaman merata, 2–3 bibit per lubang. Tinggi air 2 cm.',
+            'hst'          => (int) $tanggalTanam->diffInDays(
                 now('Asia/Jakarta')
             ),
         ];
 
-        $dataContoh = $ringkasan->dataContoh();
+        $dataContoh = $ringkasan->dataContoh('penanaman');
 
         $tab = $dataContoh['tab'];
 
         foreach ($tab as &$item) {
-            if ($item['label'] === 'Penanaman') {
-                $item['url'] = route('fase-tanam.penanaman');
-                $item['aktif'] = true;
-            } else {
-                $item['aktif'] = false;
-            }
+            $item['aktif'] = $item['label'] === 'Penanaman';
         }
 
         unset($item);
@@ -107,20 +209,24 @@ class FaseTanamController extends Controller
         $dataContoh['tab'] = $tab;
 
         return view('pages.penanaman', [
-            'title' => 'Penanaman',
-            'sekarang' => now('Asia/Jakarta')->locale('id'),
-            'daftarLahan' => $daftarLahan,
-            'lahan' => $lahan,
-            'phase' => $lahan ? $dashboard->phase($lahan) : null,
-            'waktu' => now()->locale('id')
+            'title'        => 'Penanaman',
+            'tabAktif'     => 'penanaman',
+
+            'daftarLahan'  => $daftarLahan,
+            'lahan'         => $lahan,
+
+            'phase'         => $lahan
+                ? $dashboard->phase($lahan)
+                : null,
+
+            'waktu' => now('Asia/Jakarta')
+                ->locale('id')
                 ->translatedFormat('j M Y · H.i').' WIB',
 
-            'contoh' => config('sawah_fase_tanam.contoh'),
-
-            'penanaman' => $penanaman,
+            'penanaman'    => $penanaman,
 
             'blokB' => [
-                'nama' => 'Blok B',
+                'nama'   => 'Blok B',
                 'status' => 'Persemaian sedang berjalan. Target pindah tanam 21 Nov 2026.',
             ],
 
@@ -142,11 +248,10 @@ class FaseTanamController extends Controller
     }
 
 
-    // ==========================================
-    // HALAMAN PERSEMAIAN BIBIT
-    // ==========================================
-
-    public function persemaian(
+    // ==================================================
+    // PEMELIHARAAN
+    // ==================================================
+    public function pemeliharaan(
         Request $request,
         DashboardService $dashboard,
         FaseTanamRingkasanService $ringkasan,
@@ -158,188 +263,47 @@ class FaseTanamController extends Controller
             (int) $request->query('lahan')
         ) ?? $daftarLahan->first();
 
-        // Mengambil data dari session atau data contoh
-        $data = session(
-            'persemaian_data',
-            $this->dataPersemaianDefault()
-        );
+        $sekarang = now('Asia/Jakarta')->locale('id');
 
-        // Menghitung umur bibit
-        $tanggalSemai = Carbon::parse(
-            $data['tanggal_semai'],
-            'Asia/Jakarta'
-        );
+        $pemeliharaan = [
+            'siklus'     => 'MH-2026-A',
+            'blok'       => 'Blok A',
+            'hst'        => 6,
+            'pemupukan'  => '11 Nov',
+            'tinggi_air' => '3 cm',
+            'jam_hama'   => '15.00',
+            'petugas'    => 'Pak Budi',
+        ];
 
-        $tanggalPeriksa = Carbon::parse(
-            $data['tanggal_periksa'],
-            'Asia/Jakarta'
-        );
-
-        $umurBibit = (int) $tanggalSemai->diffInDays(
-            $tanggalPeriksa
-        );
-
-        // Mengambil data tab
-        $dataContoh = $ringkasan->dataContoh();
+        $dataContoh = $ringkasan->dataContoh('pemeliharaan');
 
         $tab = $dataContoh['tab'];
 
         foreach ($tab as &$item) {
-            if ($item['label'] === 'Persemaian bibit') {
-                $item['url'] = route('fase-tanam.persemaian');
-                $item['aktif'] = true;
-            } else {
-                $item['aktif'] = false;
-            }
+            $item['aktif'] = $item['label'] === 'Pemeliharaan';
         }
 
         unset($item);
 
         $dataContoh['tab'] = $tab;
 
-        return view('pages.persemaian-bibit', [
-            'title' => 'Persemaian Bibit',
-            'sekarang' => now('Asia/Jakarta')->locale('id'),
+        return view('pages.pemeliharaan', [
+            'title'        => 'Pemeliharaan',
+            'tabAktif'     => 'pemeliharaan',
 
-            'daftarLahan' => $daftarLahan,
-            'lahan' => $lahan,
-            'phase' => $lahan ? $dashboard->phase($lahan) : null,
+            'daftarLahan'  => $daftarLahan,
+            'lahan'         => $lahan,
 
-            'contoh' => config('sawah_fase_tanam.contoh'),
+            'phase'         => $lahan
+                ? $dashboard->phase($lahan)
+                : null,
 
-            'waktu' => now()->locale('id')
-                ->translatedFormat('j M Y · H.i').' WIB',
+            'waktu'         => $sekarang->translatedFormat('j M Y · H.i').' WIB',
+            'sekarang'      => $sekarang,
 
-            'data' => $data,
-            'umurBibit' => $umurBibit,
+            'pemeliharaan'  => $pemeliharaan,
 
             ...$dataContoh,
         ]);
-    }
-
-
-    // ==========================================
-    // SIMPAN PEMERIKSAAN PERSEMAIAN
-    // ==========================================
-
-    public function storePersemaian(
-        Request $request,
-        FaseTanamRingkasanService $ringkasan,
-    ) {
-        $validated = $request->validate([
-            'lahan_siklus' => ['required', 'string'],
-            'varietas' => ['required', 'string'],
-            'tanggal_semai' => ['required', 'date'],
-            'jumlah_benih' => ['required', 'numeric', 'min:0'],
-            'tanggal_periksa' => [
-                'required',
-                'date',
-                'after_or_equal:tanggal_semai',
-            ],
-            'kondisi' => ['required', 'string'],
-            'daya_tumbuh' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'target_pindah' => ['nullable', 'date'],
-            'catatan' => ['nullable', 'string'],
-        ]);
-
-        $data = session(
-            'persemaian_data',
-            $this->dataPersemaianDefault()
-        );
-
-        // Memisahkan nama blok dan siklus
-        $bagianLahan = explode(
-            ' · ',
-            $validated['lahan_siklus']
-        );
-
-        $data['blok'] = $bagianLahan[0] ?? $data['blok'];
-        $data['siklus'] = $bagianLahan[1] ?? $data['siklus'];
-
-        $data['varietas'] = $validated['varietas'];
-        $data['tanggal_semai'] = $validated['tanggal_semai'];
-        $data['jumlah_benih'] = $validated['jumlah_benih'];
-        $data['tanggal_periksa'] = $validated['tanggal_periksa'];
-        $data['kondisi'] = $validated['kondisi'];
-
-        $data['daya_tumbuh'] = $validated['daya_tumbuh']
-            ?? $data['daya_tumbuh'];
-
-        $data['target_pindah'] = $validated['target_pindah']
-            ?? $data['target_pindah'];
-
-        $data['catatan'] = $validated['catatan'] ?? '';
-
-        // Menghitung umur bibit
-        $tglSemai = Carbon::parse(
-            $validated['tanggal_semai'],
-            'Asia/Jakarta'
-        );
-
-        $tglPeriksa = Carbon::parse(
-            $validated['tanggal_periksa'],
-            'Asia/Jakarta'
-        );
-
-        $umurBaru = (int) $tglSemai->diffInDays($tglPeriksa);
-
-        // Membuat catatan riwayat terbaru
-        $riwayatBaru = [
-            'tanggal' => $tglPeriksa->locale('id')
-                ->translatedFormat('j M Y'),
-
-            'umur' => $umurBaru,
-
-            'kondisi' => explode(
-                ' · ',
-                $validated['kondisi']
-            )[0],
-
-            'tinggi' => $validated['catatan']
-                ?: 'Pertumbuhan normal',
-
-            'daya_tumbuh' => (
-                $validated['daya_tumbuh']
-                ?? $data['daya_tumbuh']
-            ).'%',
-
-            'petugas' => 'Bu Sari',
-        ];
-
-        array_unshift($data['riwayat'], $riwayatBaru);
-
-        // Menyimpan data ke session
-        session([
-            'persemaian_data' => $data,
-        ]);
-
-        return redirect()
-            ->route('fase-tanam.persemaian')
-            ->with(
-                'success',
-                'Data pemeriksaan persemaian bibit berhasil disimpan.'
-            );
-    }
-
-
-    // ==========================================
-    // DATA CONTOH PERSEMAIAN
-    // ==========================================
-
-    private function dataPersemaianDefault(): array
-    {
-        return [
-            'blok' => 'Blok B',
-            'siklus' => 'MH-2026-B',
-            'varietas' => 'Inpari 32',
-            'tanggal_semai' => '2026-11-01',
-            'jumlah_benih' => 25000,
-            'tanggal_periksa' => '2026-11-19',
-            'kondisi' => 'Baik · Pertumbuhan normal',
-            'daya_tumbuh' => 90,
-            'target_pindah' => '2026-11-21',
-            'catatan' => 'Bibit tumbuh dengan baik.',
-            'riwayat' => [],
-        ];
     }
 }

@@ -29,6 +29,9 @@ Route::get(
 Route::post('/fase-tanam/persemaian-bibit', [FaseTanamController::class, 'storePersemaian'])
     ->name('fase-tanam.persemaian.store');
 
+    Route::get('/fase-tanam/pemeliharaan', [FaseTanamController::class, 'pemeliharaan'])
+    ->name('fase-tanam.pemeliharaan');
+
 // Rekomendasi
 Route::get('/rekomendasi', RekomendasiController::class)
     ->name('rekomendasi');
