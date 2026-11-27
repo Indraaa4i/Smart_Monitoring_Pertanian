@@ -135,3 +135,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+/* ===== T19: Kalender dan modal Jadwal & Aktivitas ===== */
+document.addEventListener('DOMContentLoaded', () => {
+    const page = document.querySelector('[data-jadwal-page]');
+    if (!page) return;
+
+    const formDialog = document.getElementById('jadwal-form-dialog');
+    const detailDialog = document.getElementById('jadwal-detail-dialog');
+
+    const bukaDialog = dialog => {
+        if (dialog && typeof dialog.showModal === 'function' && !dialog.open) {
+            dialog.showModal();
+            document.body.classList.add('modal-terbuka');
+        }
+    };
+
+    const tutupDialog = dialog => {
+        if (dialog && dialog.open) {
+            dialog.close();
+        }
+    };
+
+    page.querySelectorAll('[data-jadwal-modal-buka]').forEach(button => {
+        button.addEventListener('click', () => {
+            const dialog = document.getElementById(button.dataset.jadwalModalBuka);
+            bukaDialog(dialog);
+        });
+    });
+
+    page.querySelectorAll('[data-jadwal-dialog-tutup]').forEach(button => {
+        button.addEventListener('click', () => tutupDialog(formDialog));
+    });
+
+    page.querySelectorAll('[data-jadwal-detail-tutup]').forEach(button => {
+        button.addEventListener('click', () => tutupDialog(detailDialog));
+    });
+
+    [formDialog, detailDialog].forEach(dialog => {
+        if (!dialog) return;
+
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) {
+                tutupDialog(dialog);
+            }
+        });
+
+        dialog.addEventListener('close', () => {
+            if (![formDialog, detailDialog].some(item => item?.open)) {
+                document.body.classList.remove('modal-terbuka');
+            }
+        });
+    });
+
+    const detailFields = {
+        kegiatan: '[data-detail-kegiatan]',
+        lahan: '[data-detail-lahan]',
+        tanggal: '[data-detail-tanggal]',
+        waktu: '[data-detail-waktu]',
+        prioritas: '[data-detail-prioritas]',
+        pengingat: '[data-detail-pengingat]',
+        status: '[data-detail-status]',
+        catatan: '[data-detail-catatan]',
+    };
+
+    page.querySelectorAll('[data-jadwal-detail]').forEach(button => {
+        button.addEventListener('click', () => {
+            Object.entries(detailFields).forEach(([key, selector]) => {
+                const target = detailDialog?.querySelector(selector);
+                if (target) target.textContent = button.dataset[key] || '-';
+            });
+
+            bukaDialog(detailDialog);
+        });
+    });
+
+    // Jika validasi form gagal, tampilkan kembali dialog agar kesalahan mudah diperbaiki.
+    if (page.dataset.jadwalBukaForm === '1') {
+        bukaDialog(formDialog);
+    }
+});
+
+/* ===== T20: Pratinjau dokumentasi foto Persiapan Lahan ===== */
+document.addEventListener('DOMContentLoaded', () => {
+    const halaman = document.querySelector('[data-persiapan-page]');
+    if (!halaman) return;
+
+    const inputFoto = halaman.querySelector('[data-persiapan-foto]');
+    const wadahPreview = halaman.querySelector('[data-persiapan-preview]');
+
+    if (!inputFoto || !wadahPreview) return;
+
+    inputFoto.addEventListener('change', () => {
+        wadahPreview.replaceChildren();
+
+        const berkas = Array.from(inputFoto.files || []);
+
+        berkas.slice(0, 5).forEach((file) => {
+            if (!file.type.startsWith('image/')) return;
+
+            const gambar = document.createElement('img');
+            const url = URL.createObjectURL(file);
+
+            gambar.src = url;
+            gambar.alt = file.name;
+            gambar.title = file.name;
+
+            gambar.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
+            wadahPreview.appendChild(gambar);
+        });
+    });
+});
