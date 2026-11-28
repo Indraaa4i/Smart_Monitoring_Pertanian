@@ -16,6 +16,9 @@ use Illuminate\Validation\Rule;
 
 class FaseTanamController extends Controller
 {
+    // Tanggal tanam contoh (Blok A, MH-2026-A). Dipakai untuk menghitung HST.
+    private const TANGGAL_TANAM = '2026-11-04';
+
     // ==================================================
     // RINGKASAN, SIKLUS, RIWAYAT, JADWAL, PERSIAPAN
     // ==================================================
@@ -127,7 +130,7 @@ class FaseTanamController extends Controller
                 ? $dashboard->phase($lahan)
                 : null,
 
-            'siklus' => $service->siklusAktif(),
+            'siklus' => $this->siapkanSiklusAktif($service, $ringkasan),
             'dataSiklus' => $dataSiklus,
             'dataRiwayat' => $dataRiwayat,
             'dataJadwal' => $dataJadwal,
@@ -470,7 +473,8 @@ class FaseTanamController extends Controller
         $pemeliharaan = [
             'siklus' => 'MH-2026-A',
             'blok' => 'Blok A',
-            'hst' => 6,
+            // HST dihitung otomatis dari tanggal tanam (sebelumnya hardcode 6).
+            'hst' => $this->hitungHst(),
             'pemupukan' => '11 Nov',
             'tinggi_air' => '3 cm',
             'jam_hama' => '15.00',
@@ -496,8 +500,155 @@ class FaseTanamController extends Controller
             'waktu' => $sekarang->translatedFormat('j M Y · H.i').' WIB',
             'sekarang' => $sekarang,
             'pemeliharaan' => $pemeliharaan,
+            'logPemeliharaan' => session('pemeliharaan_log', []),
             ...$dataContoh,
         ]);
+    }
+
+    // ==================================================
+    // SIMPAN CATATAN PEMELIHARAAN
+    // ==================================================
+    public function storePemeliharaan(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'jenis' => ['required', 'in:pemupukan,penyiangan,pengairan,pestisida,lainnya'],
+            'bahan' => ['nullable', 'string', 'max:100'],
+            'dosis' => ['nullable', 'string', 'max:100'],
+            'tinggi_air' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'catatan' => ['nullable', 'string', 'max:500'],
+        ], [
+            'tanggal.before_or_equal' => 'Tanggal tidak boleh lebih dari hari ini.',
+            'jenis.in' => 'Jenis pemeliharaan tidak valid.',
+            'tinggi_air.max' => 'Tinggi air maksimal 100 cm.',
+        ]);
+
+        $log = session('pemeliharaan_log', []);
+
+        array_unshift($log, [
+            ...$validated,
+            'siklus' => 'MH-2026-A',
+            'blok' => 'Blok A',
+            'dicatat' => now('Asia/Jakarta')->format('Y-m-d H:i:s'),
+        ]);
+
+        session(['pemeliharaan_log' => $log]);
+
+        return redirect()
+            ->to(route('fase-tanam.pemeliharaan').'#log-pemeliharaan')
+            ->with('success', 'Catatan pemeliharaan berhasil disimpan.');
+    }
+
+    /**
+     * Melengkapi data siklus aktif: tombol "Catat pemeliharaan" diarahkan ke
+     * form pemeliharaan, dan progres tahapan disamakan dengan daftar tahapan.
+     */
+    private function siapkanSiklusAktif(
+        FaseTanamService $service,
+        FaseTanamRingkasanService $ringkasan,
+    ) {
+        $siklus = $service->siklusAktif();
+        $progres = $ringkasan->tahapan()['progres'];
+
+        $siklus['aksi'] ??= [];
+        $siklus['aksi']['catat_pemeliharaan'] = route('fase-tanam.pemeliharaan').'#form-pemeliharaan';
+
+        $siklus['progres'] = [
+            'teks' => $progres['teks'],
+            'persen' => $progres['persen'],
+        ];
+
+        return $siklus;
+    }
+
+    // ==================================================
+    // PANEN & EVALUASI
+    // ==================================================
+    public function panen(
+        Request $request,
+        DashboardService $dashboard,
+        FaseTanamRingkasanService $ringkasan,
+    ) {
+        $daftarLahan = Lahan::orderBy('nama_lahan')->get();
+
+        $lahan = $daftarLahan->firstWhere(
+            'id',
+            (int) $request->query('lahan')
+        ) ?? $daftarLahan->first();
+
+        $sekarang = now('Asia/Jakarta')->locale('id');
+
+        $panen = [
+            'siklus' => 'MH-2026-A',
+            'blok' => 'Blok A',
+            'varietas' => 'Inpari 32',
+            'luas_ha' => 1.2,
+            'hst' => $this->hitungHst(),
+            'perkiraan_panen' => Carbon::create(2027, 2, 22, 0, 0, 0, 'Asia/Jakarta')
+                ->locale('id')
+                ->translatedFormat('j F Y'),
+        ];
+
+        $dataContoh = $ringkasan->dataContoh('panen');
+
+        return view('pages.panen', [
+            'title' => 'Panen & Evaluasi',
+            'tabAktif' => 'panen',
+            'daftarLahan' => $daftarLahan,
+            'lahan' => $lahan,
+            'phase' => $lahan ? $dashboard->phase($lahan) : null,
+            'waktu' => $sekarang->translatedFormat('j M Y · H.i').' WIB',
+            'sekarang' => $sekarang,
+            'panen' => $panen,
+            'logPanen' => session('panen_log', []),
+            ...$dataContoh,
+        ]);
+    }
+
+    // ==================================================
+    // SIMPAN CATATAN PANEN & EVALUASI
+    // ==================================================
+    public function storePanen(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'tanggal_panen' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'luas_dipanen' => ['required', 'numeric', 'min:0.01', 'max:1000'],
+            'hasil_kg' => ['required', 'numeric', 'min:0', 'max:10000000'],
+            'kadar_air' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'harga_per_kg' => ['nullable', 'numeric', 'min:0', 'max:1000000'],
+            'evaluasi' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'tanggal_panen.before_or_equal' => 'Tanggal panen tidak boleh lebih dari hari ini.',
+            'luas_dipanen.min' => 'Luas dipanen harus lebih dari 0 ha.',
+            'kadar_air.max' => 'Kadar air harus berada pada rentang 0 sampai 100%.',
+        ]);
+
+        $log = session('panen_log', []);
+
+        array_unshift($log, [
+            ...$validated,
+            'siklus' => 'MH-2026-A',
+            'blok' => 'Blok A',
+            // Produktivitas dalam ton per hektar.
+            'produktivitas' => round(
+                ((float) $validated['hasil_kg'] / (float) $validated['luas_dipanen']) / 1000,
+                2
+            ),
+            'dicatat' => now('Asia/Jakarta')->format('Y-m-d H:i:s'),
+        ]);
+
+        session(['panen_log' => $log]);
+
+        return redirect()
+            ->to(route('fase-tanam.panen').'#log-panen')
+            ->with('success', 'Catatan panen dan evaluasi berhasil disimpan.');
+    }
+
+    private function hitungHst(): int
+    {
+        return max(0, (int) Carbon::parse(self::TANGGAL_TANAM, 'Asia/Jakarta')
+            ->startOfDay()
+            ->diffInDays(now('Asia/Jakarta')->startOfDay()));
     }
 
     // ==================================================

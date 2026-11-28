@@ -78,16 +78,57 @@ class FaseTanamRingkasanService
         ];
     }
 
-    private function tahapan(): array
+    /**
+     * Daftar tahapan + progres yang dihitung otomatis dari status tiap tahap.
+     * Satu-satunya sumber kebenaran: ubah 'status' di sini, progres ikut berubah.
+     */
+    public function tahapan(): array
     {
+        $daftar = [
+            [
+                'nama' => 'Persiapan lahan',
+                'meta' => '20–28 Okt · Selesai',
+                'status' => 'selesai',
+                'url' => route('fase-tanam', ['tab' => 'persiapan']),
+            ],
+            [
+                'nama' => 'Persemaian bibit',
+                'meta' => '15 Okt–3 Nov · Selesai',
+                'status' => 'selesai',
+                'url' => route('fase-tanam.persemaian'),
+            ],
+            [
+                'nama' => 'Penanaman',
+                'meta' => '4 Nov · Selesai',
+                'status' => 'selesai',
+                'url' => route('fase-tanam.penanaman'),
+            ],
+            [
+                'nama' => 'Pemeliharaan',
+                'meta' => $this->hst().' HST · Berlangsung',
+                'status' => 'berlangsung',
+                'url' => route('fase-tanam.pemeliharaan'),
+            ],
+            [
+                'nama' => 'Panen & evaluasi',
+                'meta' => '22 Feb 2027 · Rencana',
+                'status' => 'rencana',
+                'url' => route('fase-tanam.panen'),
+            ],
+        ];
+
+        $total = count($daftar);
+        $selesai = count(array_filter($daftar, fn ($t) => $t['status'] === 'selesai'));
+        $persen = $total > 0 ? (int) round($selesai / $total * 100) : 0;
+
         return [
             'keterangan' => 'Siklus MH-2026-A · Tahap panen diselesaikan saat siklus ditutup.',
-            'daftar' => [
-                ['nama' => 'Persiapan lahan', 'meta' => '20–28 Okt · Selesai', 'status' => 'selesai'],
-                ['nama' => 'Persemaian bibit', 'meta' => '15 Okt–3 Nov · Selesai', 'status' => 'selesai'],
-                ['nama' => 'Penanaman', 'meta' => '4 Nov · Selesai', 'status' => 'selesai'],
-                ['nama' => 'Pemeliharaan', 'meta' => $this->hst().' HST · Berlangsung', 'status' => 'berlangsung'],
-                ['nama' => 'Panen & evaluasi', 'meta' => '22 Feb 2027 · Rencana', 'status' => 'rencana'],
+            'daftar' => $daftar,
+            'progres' => [
+                'selesai' => $selesai,
+                'total' => $total,
+                'persen' => $persen,
+                'teks' => "{$selesai} dari {$total} tahap selesai · {$persen}% tahapan",
             ],
         ];
     }

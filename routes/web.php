@@ -38,6 +38,17 @@ Route::post('/fase-tanam/persemaian-bibit', [FaseTanamController::class, 'storeP
 Route::get('/fase-tanam/pemeliharaan', [FaseTanamController::class, 'pemeliharaan'])
     ->name('fase-tanam.pemeliharaan');
 
+// BARU: simpan catatan pemeliharaan
+Route::post('/fase-tanam/pemeliharaan', [FaseTanamController::class, 'storePemeliharaan'])
+    ->name('fase-tanam.pemeliharaan.store');
+
+// BARU: Fase Tanam > Panen & Evaluasi
+Route::get('/fase-tanam/panen', [FaseTanamController::class, 'panen'])
+    ->name('fase-tanam.panen');
+
+Route::post('/fase-tanam/panen', [FaseTanamController::class, 'storePanen'])
+    ->name('fase-tanam.panen.store');
+
 // Fase Tanam > Jadwal & Aktivitas
 Route::post('/fase-tanam/aktivitas', [FaseTanamController::class, 'storeAktivitas'])
     ->name('fase-tanam.aktivitas.store');
